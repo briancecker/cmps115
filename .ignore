@@ -8,3 +8,4 @@ settings.py
 
 db.sqlite3
 
+venv/
