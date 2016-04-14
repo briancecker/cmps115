@@ -15,9 +15,12 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.contrib.auth.views import login
+from django.contrib.auth.views import logout
 
 urlpatterns = [
     # map sends the default index page to be mapped by the main app
     url(r'^$', include('main.urls'), name="main"),
     url(r'^admin/', admin.site.urls, name="admin"),
+    url(regex=r'^login/$', view=login, kwargs={'template_name' : 'login.html'}, name='login'),
 ]
