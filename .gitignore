@@ -13,3 +13,5 @@ venv/
 *.sln
 
 *.pyproj
+
+lazy_lecture_bot/tmp/*
