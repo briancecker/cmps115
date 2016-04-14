@@ -1,3 +1,9 @@
+# External Dependencies
+LazyLectureBot depends on the following external programs and libraries to function. Install them before moving on to
+the Setup phase.
+
+1. [ffmpeg](thttps://www.ffmpeg.org/) to strip audio from videos. 
+
 # Setup
 Commands you should execute and filenames/folders are surrounded with backticks, e.g. `execute this`, `/home/brian/`
 
