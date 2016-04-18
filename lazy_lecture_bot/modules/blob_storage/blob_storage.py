@@ -24,7 +24,7 @@ def store_bsr(file, move_file=True):
     """
     file_name = file_to_hashed_name(file)
     current_date = datetime.utcnow()
-    date_path = (str(current_date.year), str(current_date.month), str(current_date.day))
+    date_path = (current_date.year, current_date.month, current_date.day)
     bsr_path = os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None), *map(str, date_path)))
     if not os.path.exists(bsr_path):
         os.makedirs(bsr_path)
