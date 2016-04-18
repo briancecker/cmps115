@@ -4,43 +4,22 @@
 <head>
 	<title>LazyLectureBot | Home</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous"/>
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 </head>
 
 <body>
-
-	<nav class="navbar navbar-default navbar-static top">
-		<div class="container-fluid">
-			<div class="navbar-header">
-				<a class="navbar-brand" href="#">
-					<img alt="Brand" src="..."> <!-- TODO : Replace with logo -->
-				</a>
-			</div>
+	{% if not request.user.is_autheticated %}
+	<form method='POST' action='{% url "auth_login" %}'>
+	{% csrf_token %}
+		<div class='form-group'>
+			<input type='text' class='form-control' name='username' placeholder='Username'></input>
 		</div>
-	</nav> <!--  TODO : Complete Navigation Bar -->
-
-	<div class="login-wrapper">
-		<label>: Login Form :</label>
-		<form method="post">
-			Username:<br>
-			<input type="text"></input><br>
-			Password:<br>
-			<input type="password"></input><br>
-			Confirm Password:<br>
-			<input type="password"></input><br>
-			<input type="submit" value="Submit"></input>
-		</form>
-	</div>
-
-	<div class="signup-wrapper">
-		<label>: Logout Form :</label>
-		<form method="post">
-			Username:<br>
-			<input type="text"></input><br>
-			Password:<br>
-			<input type="password"></input><br>
-			<input type="submit" value="Submit"></input>
-		</form>
-	</div>
+		<div class='form-group'>
+			<input type='password' class='form-control' name='password' placeholder='Password'></input>
+		</div>
+		<button type='submit' class='btn btn-default'>Login</button>
+	</form>
+	{% endif %}
 </body>
 </html>
