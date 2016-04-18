@@ -2,7 +2,7 @@ import subprocess
 import wave
 
 import os
-from lazy_lecture_bot.modules import file_utilities
+from modules import file_utilities
 
 STRIP_AUDIO_CMD = "ffmpeg -i {input_file} -y -ab 160k -ac 2 -ar 44100 -vn {output_file}"
 

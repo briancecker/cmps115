@@ -4,7 +4,7 @@ import os
 import subprocess
 import unittest
 
-from lazy_lecture_bot.modules import file_utilities
+from modules import file_utilities
 
 
 class VideoProcessingTest(unittest.TestCase):
@@ -16,7 +16,7 @@ class VideoProcessingTest(unittest.TestCase):
                 self.fail("ffmpeg not found. Please install ffmpeg.")
 
     def test_strip_audio(self):
-        from lazy_lecture_bot.modules.video_processing.video_processing import strip_audio
+        from modules.video_processing.video_processing import strip_audio
         test_video = file_utilities.abs_resource_path(["test_videos", "cpp_example.mp4"])
         self.assertTrue(os.path.exists(test_video))
 
@@ -30,12 +30,12 @@ class VideoProcessingTest(unittest.TestCase):
         os.remove(audio_f)
 
     def test_audio_segmenting(self):
-        from lazy_lecture_bot.modules.video_processing.video_processing import read_audio_segments
+        from modules.video_processing.video_processing import read_audio_segments
         test_audio = file_utilities.abs_resource_path(["test_videos", "audio_cpp_example.mp4.wav"])
         self.assertEqual(len(list(read_audio_segments(test_audio, 14))), 17)
 
     def test_audio_segment_writing(self):
-        from lazy_lecture_bot.modules.video_processing.video_processing \
+        from modules.video_processing.video_processing \
             import read_audio_segments, copy_audio_file_settings
 
         test_audio = file_utilities.abs_resource_path(["test_videos", "audio_cpp_example.mp4.wav"])
