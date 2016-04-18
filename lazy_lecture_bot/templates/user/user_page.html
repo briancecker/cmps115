@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{user.username}} || LazyLecture User</title>
+</head>
+<body>
+	<a href='{% url "profile" username=user.username %}'>{{user.username}}</a>
+	{{user.first_name}}
+</body>
+</html>
