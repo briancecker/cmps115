@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{% block title %}Lazy Lecture Bot{% endblock title %}</title>
+</head>
+<body>
+	<div class="container">
+		{% block content %}
+		<!-- NAVIGATION BAR -->
+		<nav>
+		<span>LazyLectureBot.com</span>
+		{% if user.is_active %}
+			<span><a>{{user.username}}</a></span>
+			<span><a href="">logoff</a></span>
+		{% else %}
+			<span><a href="">login</a></span>
+			<span><a href="">signup</a></span>
+		{% endif %}
+		</nav> <!--END OF NAVIGATION BAR -->
+		{% endblock content %}
+	</div>
+</body>
+</html>
