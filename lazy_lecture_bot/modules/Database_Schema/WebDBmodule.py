@@ -43,6 +43,9 @@ class transcripts(models.Model):
     video_ID = models.ForeignKey(videos.video_id)
     Segment_ID = models.ForeignKey(segments.Segment_ID)
     text = models.TextField()
+    
+    def __unicode__(self):
+        return self.transcript_ID
 
 
 class annotation(models.Model):
