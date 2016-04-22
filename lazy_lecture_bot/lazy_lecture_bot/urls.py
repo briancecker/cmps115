@@ -17,6 +17,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 
 from user import views as user_views
+from videos import views as video_views
 
 urlpatterns = [
     # map sends the default index page to be mapped by the main app
@@ -27,4 +28,5 @@ urlpatterns = [
     url(r'^logoff/', user_views.logoff_user, name="logoff"),
     url(r'^login/$', user_views.login_user, name="login"),
     url(r'^login/auth_login/$', user_views.auth_login, name="auth_login"),
+	url(r'^videos/', video_views.video_serve, name="videos")
 ]
