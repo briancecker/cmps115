@@ -1,0 +1,10 @@
+{% extends "main/base.html" %}
+{% block title %}{{user_instance.username}} | {{block.super}}{% endblock title %}
+{% block content %}
+{{block.super}}
+<h1><a href='{% url "profile" username=user_instance.username %}'>{{user_instance.username}}</a></h1>
+<div>
+	{{user_instance.username}}'s videos
+	<div>None</div>
+</div>
+{% endblock content %}

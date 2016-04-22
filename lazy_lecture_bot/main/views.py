@@ -2,4 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 def index(request):
-    return HttpResponse("Hello, world. You're in the main controller.")
+	context = {
+		"user" : request.user
+	}
+	return render(request, 'main/index.html', context)
