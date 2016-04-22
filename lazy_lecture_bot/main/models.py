@@ -17,6 +17,7 @@ class videos(models.Model):
 
     user_ID = models.IntegerField() 
     user_ID = models.ForeignKey() #this still needs a path to link to blob_storage user_ID
+    finished_uploading = models.BooleanField()
 
     def __unicode__(self):
         return self.video_id
