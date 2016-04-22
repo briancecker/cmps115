@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from modules import file_utilities
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -119,3 +121,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Define space to store blob files
+# see the wiki for more information: https://github.com/briancecker/cmps115/wiki/Blob-and-Video-Storage/
+BLOB_STORAGE_ROOT = os.path.join(file_utilities.TMP_DIR, "BLOB_STORAGE_ROOT")
+if not os.path.exists(BLOB_STORAGE_ROOT):
+    os.makedirs(BLOB_STORAGE_ROOT)
