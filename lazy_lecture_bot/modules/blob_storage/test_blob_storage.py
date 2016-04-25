@@ -2,6 +2,7 @@ import os
 from django.conf import settings
 from django.test import TestCase
 from django.utils.datetime_safe import datetime
+from main.models import BlobStorage
 from modules import file_utilities
 from modules.blob_storage import blob_storage
 
@@ -42,6 +43,10 @@ class BlobStorageTest(TestCase):
         self.assertTrue(os.path.exists(dir_path))
         self.assertTrue(os.path.exists(full_path))
         self.assertTrue(os.path.exists(self.test_file))
+
+        # Check that it's in the database
+        blobs = BlobStorage.objects.all()
+        self.assertEqual(len(blobs), 1)
 
         # Remove file from BSR
         print(full_path)
