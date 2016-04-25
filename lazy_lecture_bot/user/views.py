@@ -3,11 +3,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .forms import SignUpForm
+from user.forms import *
+from django.views.decorators.csrf import csrf_protect
 
-#############
-# SHOW USER #
-#############
+"""""""""""""""""
+
+  	SHOW USER
+
+"""""""""""""""""
 def show_user(request, username="None"):
 	if username is not "None":
 		user_instance = get_object_or_404(User,  username=username)
@@ -22,60 +25,78 @@ def show_user(request, username="None"):
 		}
 	return render(request, "user/user_page.html", context)
 
-###################
-# CREATE NEW USER #
-###################
+"""""""""""""""""""""
+
+  	CREATE NEW USER / REGISTRATION
+
+"""""""""""""""""""""
+@csrf_protect
 def signup_view(request):
-	form = SignUpForm()
+	if request.method == "POST":
+		form = RegistrationForm(request.POST)
+		if form.is_valid():
+			user = User.objects.create_user(
+				username = form.cleaned_data['username'],
+				password = form.cleaned_data['password'],
+				email=form.cleaned_data['email']
+				)
+			return HttpResponse("User creation SUCCESS")
+	else:
+		form = RegistrationForm()
+
 	context = {
-		"form": form,
+		'form': form
 	}
 	return render(request, "user/signup.html", context)
 
-##############
-# LOGIN USER #
-##############
+
+"""""""""""""""
+
+  	LOGIN USER
+
+"""""""""""""""
+
 def login_user(request):
 	if not request.user.is_authenticated:
 		return render(request, "user/login.html", {})
 	else:
-		return redirect("/u/")
+		return render(request, "user/login.html", {})
 
 def auth_login(request): ## This is where the actual authentication is happening
-	username = request.POST['username']
-	password = request.POST['password']
-	user = authenticate(username=username, password=password)
-	if user is not None:
-		if user.is_active:
-			login(request, user)
-			return redirect("/")
-			# SUCCESS
-		else:
-			return HttpResponse("DISABLED :(") ## --------------------------FIX THIS
-			# Redirect Disabled account
-	else:
-		# Return Invalid Login
-		return HttpResponse("Invalid Login :(") ## ---------------------------FIX THIS
+	form = LoginForm(request.POST)
+	if form.is_valid():
+		user = form.login(request)
+		login(request, user)
+		return redirect("/")
 
-##########################################################
-# UPDATE USER - Allows User to update their profile info #
-##########################################################
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  	********** TBI *********
+  	UPDATE USER - Allows User to update their profile info. 
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 @login_required
 def update_user(request):
 	return HttpResponse("Update User")
 
 
-######################################################################################
-# DELETE USER PROFILE - Doesn't actually delete the profile but marks it as inactive #
-######################################################################################
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+	******* TBI ************
+  	DELETE USER PROFILE - Doesn't actually delete the profile but marks it as inactive
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 @login_required
 def delete_user(request):
 	return HttpResponse("Delete User")
 
+"""""""""""""""
 
-#############
-#  LOGOFF   #
-#############
+  	LOGOFF   
+
+"""""""""""""""
 @login_required
 def logoff_user(request):
 	logout(request)
