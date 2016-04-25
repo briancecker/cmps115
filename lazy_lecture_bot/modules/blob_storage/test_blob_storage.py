@@ -49,7 +49,6 @@ class BlobStorageTest(TestCase):
         self.assertEqual(len(blobs), 1)
 
         # Remove file from BSR
-        print(full_path)
         os.remove(full_path)
 
     def test_read(self):
