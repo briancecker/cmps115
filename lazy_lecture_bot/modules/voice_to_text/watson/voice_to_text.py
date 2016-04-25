@@ -27,4 +27,5 @@ def transcribe_file(path, credentials):
 
 if __name__ == "__main__":
     creds = get_credentials()
-    transcribe_file(file_utilities.abs_resource_path(["test_videos", "16Khz_50_sec_audio_cpp_example.mp4.wav"]), creds)
+    print(transcribe_file(file_utilities.abs_resource_path(
+        ["test_videos", "16Khz_50_sec_audio_cpp_example.mp4.wav"]), creds))

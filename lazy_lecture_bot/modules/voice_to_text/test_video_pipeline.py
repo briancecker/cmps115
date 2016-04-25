@@ -8,7 +8,6 @@ from django.utils import timezone
 from lazy_lecture_bot.settings import BLOB_STORAGE_ROOT
 from main.models import Videos, Segments, Transcripts, BlobStorage
 from modules import file_utilities
-from modules.blob_storage import blob_storage
 from modules.voice_to_text.audio_segmenter import AudioSegmenter
 from modules.voice_to_text.audio_transcriber import AudioTranscriber
 from modules.voice_to_text.video_pipeline import VideoPipeline
@@ -40,20 +39,18 @@ class RandomSegmenter(AudioSegmenter):
         Returns:
 
         """
+        segment_tuples = list()
         for i in range(1, self.n_segments + 1):
             f = os.path.abspath(os.path.join(file_utilities.TMP_DIR, "test_seg_{0}.bin".format(i)))
             self.files.append(f)
+            segment_tuples.append((f, random.randint(1, 10)))
             with open(f, 'wb') as fh:
                 fh.write(os.urandom(self.file_size))
 
-        return self.files
+        return segment_tuples
 
 
 class RandomTranscriber(AudioTranscriber):
-    def __init__(self):
-        # Required attribute for transcribers
-        self.segment_length = 15
-
     def transcribe(self, audio):
         return ''.join(random.choice(string.ascii_lowercase) for i in range(15))
 

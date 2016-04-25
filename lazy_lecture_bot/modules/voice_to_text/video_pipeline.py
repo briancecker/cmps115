@@ -66,10 +66,10 @@ class VideoPipeline:
 
         """
         db_segments = list()
-        for segment_index, segment in enumerate(segments):
+        for segment_index, (segment, segment_duration) in enumerate(segments):
             audio_blob = store_bsr(segment)
             db_segment = Segments(video_id=db_video, segment_index=segment_index,
-                                  segment_duration=self.audio_transcriber.segment_length,
+                                  segment_duration=segment_duration,
                                   audio_blob=audio_blob)
             db_segment.save()
             db_segments.append(db_segment)
@@ -80,7 +80,7 @@ class VideoPipeline:
         """
         Store each transcription according to its corresponding segment_id
         Args:
-            video_id: The video id of the video that owns these segments
+            db_video: The Videos entry of the video that owns these segments
             db_segments: The list of Segments entries that correspond to each transcription
             transcriptions: The transcription objects (TODO: should be something other than strings eventually)
         Returns:
@@ -95,12 +95,9 @@ class VideoPipeline:
         db_video = self.store_video_and_audio(video, audio)
         audio_segments = self.audio_segmenter.segment(audio)
         db_segments = self.store_segments(db_video, audio_segments)
-        transcriptions = [self.audio_transcriber.transcribe(segment) for segment in audio_segments]
+        transcriptions = [self.audio_transcriber.transcribe(segment[0]) for segment in audio_segments]
         self.store_transcripts(db_video, db_segments, transcriptions)
         db_video.finished_processing = True
         db_video.save()
 
         return db_video
-
-
-

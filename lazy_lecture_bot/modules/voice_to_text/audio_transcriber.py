@@ -8,4 +8,12 @@ class AudioTranscriber:
     __metaclass__ = ABCMeta
 
     def transcribe(self, audio):
+        """
+        Transcribe an audio clip into text.
+        Args:
+            audio: Path to the audio clip
+
+        Returns:
+
+        """
         raise NotImplementedError("transcribe is not implemented")
