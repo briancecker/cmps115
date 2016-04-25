@@ -5,11 +5,12 @@
 	
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
 	 
 </head>
 
 <body>
-	<div class="container-fluid">
+	<div>
 		{% block content %}
 		<!-- NAVIGATION BAR -->
 		<nav class="navbar navbar-default"> 
@@ -22,7 +23,9 @@
 				<span class="navbar-text navbar-right">+ Add A Video</span>
 				
 				{% elif not request.user.is_authenticated and not "/login" in request.get_full_path %}
-				<button type="button" class="navbar-right btn btn-default navbar-btn">Sign-Up</button>
+				<a href='{% url "signup" %}'>Sign-Up</a>
+
+				<!-- LOGIN FORM-->
 				<form class="navbar-form navbar-right" method="POST" action='{% url "auth_login" %}'>{% csrf_token %}
 					<div class="form-group">
 						<input type="text" class="form-control" name="username" placeholder="Username" />
@@ -32,6 +35,8 @@
 					</div>
 					<button type="submit" class="btn btn-default">Login</button>
 				</form>
+
+				
 				{% endif %}
 
 			</div>
