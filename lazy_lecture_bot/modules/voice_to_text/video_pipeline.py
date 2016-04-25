@@ -10,12 +10,11 @@ class VideoPipelineException(Exception):
 
 class VideoPipeline:
     """
-    Abstract base class for video pipelines.
+    Base class for video pipelines.
 
     Derived classes should provide the following objects:
-        audio_segmenter: Given an audio file, segment it into appropriate sized pieces. Derived classes can call
-                       VideoPipeline.split_audio(segment_length=x) to help with this task.
-        audio_transcriber: Given an audio file, return a transcription dictionary.
+        self.audio_segmenter: Given an audio file, segment it into appropriate sized pieces.
+        self.audio_transcriber: Given an audio file, return a transcription dictionary.
     """
     __metaclass__ = ABCMeta
 
