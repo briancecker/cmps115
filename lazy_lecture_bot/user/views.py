@@ -57,10 +57,20 @@ def signup_view(request):
 """""""""""""""
 
 def login_user(request):
-	if not request.user.is_authenticated:
-		return render(request, "user/login.html", {})
+	if not request.user.is_active:
+		if request.method == "POST":
+			form = LoginForm(request.POST)
+			if form.is_valid():
+				user = form.login(request)
+				login(request, user)
+				return redirect("/")
 	else:
-		return render(request, "user/login.html", {})
+		return redirect(show_user)
+	form = LoginForm()
+	context = {
+		'form': form
+	}
+	return render(request, "user/login.html", context)
 
 def auth_login(request): ## This is where the actual authentication is happening
 	form = LoginForm(request.POST)
