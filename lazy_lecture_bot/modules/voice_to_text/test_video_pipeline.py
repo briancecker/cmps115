@@ -9,11 +9,13 @@ from lazy_lecture_bot.settings import BLOB_STORAGE_ROOT
 from main.models import Videos, Segments, Transcripts, BlobStorage
 from modules import file_utilities
 from modules.blob_storage import blob_storage
+from modules.voice_to_text.audio_segmenter import AudioSegmenter
+from modules.voice_to_text.audio_transcriber import AudioTranscriber
 from modules.voice_to_text.video_pipeline import VideoPipeline
 from tempfile import NamedTemporaryFile
 
 
-class RandomSegmenter:
+class RandomSegmenter(AudioSegmenter):
     def __init__(self, n_segments):
         self.files = list()
         self.file_size = 5120
@@ -47,12 +49,12 @@ class RandomSegmenter:
         return self.files
 
 
-class RandomTranscriber:
+class RandomTranscriber(AudioTranscriber):
     def __init__(self):
         # Required attribute for transcribers
         self.segment_length = 15
 
-    def transcribe(self, *args):
+    def transcribe(self, audio):
         return ''.join(random.choice(string.ascii_lowercase) for i in range(15))
 
 
