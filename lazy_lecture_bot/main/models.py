@@ -9,17 +9,17 @@ from lazy_lecture_bot.settings import BLOB_STORAGE_ROOT
 
 
 class BlobStorage(models.Model):
-    date = models.DateTimeField(default=timezone.now())
+    date = models.DateTimeField(default=timezone.now)
     # Restrict all possible file names to only those files in the BLOB_STORAGE_ROOT
     file_name = models.FilePathField(BLOB_STORAGE_ROOT, recursive=True)
 
 
 class Videos(models.Model):
-    audio_path = models.ForeignKey("BlobStorage", related_name="audio_path")
-    video_path = models.ForeignKey("BlobStorage", related_name="video_path")
+    audio_blob = models.ForeignKey("BlobStorage", related_name="audio_path")
+    video_blob = models.ForeignKey("BlobStorage", related_name="video_path")
     user_id = models.IntegerField()
     # user_id = models.ForeignKey()  # this still needs a path to link to blob_storage user_ID
-    finished_uploading = models.BooleanField()
+    finished_processing = models.BooleanField()
 
     def __unicode__(self):
         return self.video_id
@@ -30,8 +30,7 @@ class Segments(models.Model):
     segment_index = models.IntegerField()
     # Video duration in seconds
     segment_duration = models.FloatField()
-    audio_path = models.URLField()
-    video_path = models.URLField()
+    audio_blob = models.ForeignKey("BlobStorage")
 
     def __unicode__(self):
         return self.segment_id

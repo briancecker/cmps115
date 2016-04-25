@@ -17,7 +17,7 @@ def store_bsr(file, move_file=True):
         move_file: True to move the file from its old location to the new location in bsr. False to copy the file but
         leave it in the old location as well.
 
-    Returns: the id of the entry in the BlobStorage table
+    Returns: A tuple of (BlobStorage entry, file_hash, year, month, day)
 
     """
     file_name = file_to_hashed_name(file)
@@ -37,7 +37,7 @@ def store_bsr(file, move_file=True):
     bs = BlobStorage(file_name=file_name)
     bs.save()
 
-    return bs.id
+    return bs
 
 
 def read_bsr(year, month, day, file_hash):

@@ -24,8 +24,8 @@ class VideoProcessingTest(unittest.TestCase):
         self.assertEqual(return_code, 0)
 
         with wave.open(audio_f, 'rb') as wave_read:
-            self.assertEqual(wave_read.getnframes(), 10404864)
-            self.assertEqual(wave_read.getframerate(), 44100)
+            self.assertEqual(wave_read.getframerate(), 16000)
+            self.assertEqual(wave_read.getnframes(), 3775007)
 
         os.remove(audio_f)
 

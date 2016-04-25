@@ -4,7 +4,7 @@ import wave
 import os
 from modules import file_utilities
 
-STRIP_AUDIO_CMD = "ffmpeg -i {input_file} -y -ab 160k -ac 2 -ar 44100 -vn {output_file}"
+STRIP_AUDIO_CMD = "ffmpeg -i {input_file} -y -ab 160k -ac 2 -ar 16000 -vn {output_file}"
 
 
 def strip_audio(video):
@@ -14,7 +14,7 @@ def strip_audio(video):
     Args:
         video: The path to the video to take audio from
 
-    Returns: The path to an audio file.
+    Returns: The path to an audio file and the ffmpeg return code
 
     """
     if not os.path.exists(video):
