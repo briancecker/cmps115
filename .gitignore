@@ -15,3 +15,4 @@ venv/
 *.pyproj
 
 lazy_lecture_bot/tmp/*
+lazy_lecture_bot/resources/credentials/*
