@@ -22,7 +22,7 @@ class VideoPipeline:
         self.audio_segmenter = audio_segmenter
         self.audio_transcriber = audio_transcriber
 
-    def strip_audio(self, video):
+    def _strip_audio(self, video):
         """
 
         Args:
@@ -37,7 +37,7 @@ class VideoPipeline:
 
         return audio_file
 
-    def store_video_and_audio(self, video, audio):
+    def _store_video_and_audio(self, video, audio):
         """
         Store the audio and video files and setup Videos entry in database.
         Args:
@@ -55,7 +55,7 @@ class VideoPipeline:
         video.save()
         return video
 
-    def store_segments(self, db_video, segments):
+    def _store_segments(self, db_video, segments):
         """
         Store each segment in the database.
         Args:
@@ -76,7 +76,7 @@ class VideoPipeline:
 
         return db_segments
 
-    def store_transcripts(self, db_video, db_segments, transcriptions):
+    def _store_transcripts(self, db_video, db_segments, transcriptions):
         """
         Store each transcription according to its corresponding segment_id
         Args:
@@ -91,12 +91,23 @@ class VideoPipeline:
             db_trans.save()
 
     def process_video(self, video):
-        audio = self.strip_audio(video)
-        db_video = self.store_video_and_audio(video, audio)
+        """
+        Submit a video to be processed by the pipeline. When finished processing, the video will be stored, segmented,
+        transcribed, and ready to use. This function may run asynchronously, so just because the function returns, this
+        does not mean that the video is done processing. In order to determine if the video is done being processed,
+        check that the "finished_processing" field of the Videos entry returned from this function is set to true.
+        Args:
+            video: The path to a video file to process.
+
+        Returns: The Videos entry created in the database.
+
+        """
+        audio = self._strip_audio(video)
+        db_video = self._store_video_and_audio(video, audio)
         audio_segments = self.audio_segmenter.segment(audio)
-        db_segments = self.store_segments(db_video, audio_segments)
+        db_segments = self._store_segments(db_video, audio_segments)
         transcriptions = [self.audio_transcriber.transcribe(segment[0]) for segment in audio_segments]
-        self.store_transcripts(db_video, db_segments, transcriptions)
+        self._store_transcripts(db_video, db_segments, transcriptions)
         db_video.finished_processing = True
         db_video.save()
 

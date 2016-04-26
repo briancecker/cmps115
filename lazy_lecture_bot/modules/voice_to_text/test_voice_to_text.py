@@ -10,6 +10,7 @@ from main.models import Videos, Segments, Transcripts, BlobStorage
 from modules import file_utilities
 from modules.voice_to_text.audio_segmenter import AudioSegmenter
 from modules.voice_to_text.audio_transcriber import AudioTranscriber
+from modules.voice_to_text.max_size_audio_segmenter import MaxSizeAudioSegmenter
 from modules.voice_to_text.video_pipeline import VideoPipeline
 from tempfile import NamedTemporaryFile
 
@@ -101,3 +102,14 @@ class TestVideoPipeline(TestCase):
         self.assertEqual(Transcripts.objects.count(), self.n_segments)
         # 2 for the original video and audio + the number of segments made
         self.assertEqual(BlobStorage.objects.count(), 2 + self.n_segments)
+
+
+class TestMaxSizeAudioSegmenter(TestCase):
+    def test_segment(self):
+        segmenter = MaxSizeAudioSegmenter()
+        video = file_utilities.abs_resource_path(["test_videos", "16Khz_50_sec_audio_cpp_example.mp4.wav"])
+        segments = list(segmenter.segment(video))
+        # There should only be one segment
+        self.assertEqual(len(segments), 1)
+        # Segment is around 50 seconds long as it should be
+        self.assertLessEqual(segments[0][1] - 50.0, 1.0)

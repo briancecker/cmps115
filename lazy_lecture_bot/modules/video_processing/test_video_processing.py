@@ -30,16 +30,16 @@ class VideoProcessingTest(unittest.TestCase):
         os.remove(audio_f)
 
     def test_audio_segmenting(self):
-        from modules.video_processing.video_processing import read_audio_segments
+        from modules.video_processing.video_processing import read_audio_segments_by_time
         test_audio = file_utilities.abs_resource_path(["test_videos", "audio_cpp_example.mp4.wav"])
-        self.assertEqual(len(list(read_audio_segments(test_audio, 14))), 17)
+        self.assertEqual(len(list(read_audio_segments_by_time(test_audio, 14))), 17)
 
     def test_audio_segment_writing(self):
         from modules.video_processing.video_processing \
-            import read_audio_segments, copy_audio_file_settings
+            import read_audio_segments_by_time, copy_audio_file_settings
 
         test_audio = file_utilities.abs_resource_path(["test_videos", "audio_cpp_example.mp4.wav"])
-        for i, segment in enumerate(read_audio_segments(test_audio, 14)):
+        for i, segment in enumerate(read_audio_segments_by_time(test_audio, 14)):
             audio_out = os.path.join(file_utilities.TMP_DIR, "test_{0}.wav".format(i))
             try:
                 wave_write = copy_audio_file_settings(test_audio, audio_out)
