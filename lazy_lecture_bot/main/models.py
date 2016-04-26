@@ -56,7 +56,7 @@ class Utterances(models.Model):
 class Tokens(models.Model):
     utterance_id = models.ForeignKey("Utterances")
     token_index = models.IntegerField()
-    start_tiem = models.FloatField()
+    start_time = models.FloatField()
     end_time = models.FloatField()
     # Possible overkill, but it's there I guess: https://en.wikipedia.org/wiki/Longest_word_in_English
     text = models.CharField(max_length=35)
