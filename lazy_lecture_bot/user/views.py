@@ -40,7 +40,9 @@ def signup_view(request):
 				password = form.cleaned_data['password'],
 				email=form.cleaned_data['email']
 				)
-			return HttpResponse("User creation SUCCESS")
+			user = authenticate(username=request.POST["username"], password=request.POST["password"])
+			login(request, user)
+			return redirect("/")
 	else:
 		form = RegistrationForm()
 

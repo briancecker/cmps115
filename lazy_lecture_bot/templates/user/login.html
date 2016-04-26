@@ -6,9 +6,24 @@
 {{block.super}}
 
 <div class="container">
-	<form method="POST" action=".">{% csrf_token %}
-		{{form.as_p}}
-		<input type="submit" value="Log In"></input>
-	</form>
+	<div class="row">
+		<div class="col-md-4 col-md-offset-4">
+			<div class="">
+				<form method="POST" action=".">{% csrf_token %}
+					<div class="form-group">
+						{{ form.username.errors }}
+						<label for="{{form.username.id_for_label}}">Username</label>
+						{{form.username}}
+					</div>
+					<div class="form-group">
+						{{ form.password.errors }}
+						<label for="{{form.password.id_for_label}}">Password</label>
+						{{form.password}}
+					</div>
+					<input type="submit" value="Log In" class="btn btn-primary btn-block btn-lg"></input>
+				</form>
+			</div>
+		</div>
+	</div>
 </div>
 {% endblock content%}

@@ -2,7 +2,29 @@
 
 {% block content %}
 {{block.super}}
-<div>
-	INDEX
+
+<div class="container">
+	<ul class="nav nav-tabs nav-justified">
+		<li class="active"><a href="#">Public Videos</a></li>
+		{% if request.user.is_authenticated %}
+		<li><a href="/">My Subcriptions</a></li>
+		<li><a href="/">My Favorites</a></li>
+		{% endif %}
+	</ul>
+	<div class="row" style="margin-top: 30px;">
+		<!-- VIDEO PREVIEW -->
+		<div class="col-sm-3"> 
+			<div class="thumbnail">
+	      		<img src="..." alt="..." style="height: 140px; background-color: rgb(189, 195, 199)" />
+	      		<div class="caption">
+	        		<b><a href="#">Video Title 1</a></b>
+	        		<p>By Testname</p>
+	        		<p>
+	        		07:00<br>
+	        		Posted on: 00/00/00</p>
+	      		</div>
+	      	</div>
+	    </div><!-- END OF VIDEO PREVIEW -->
+	</div>
 </div>
 {% endblock content %}
