@@ -22,7 +22,7 @@ urlpatterns = [
     # map sends the default index page to be mapped by the main app
     url(r'^$', include('main.urls'), name="main"),
     url(r'^admin/', admin.site.urls, name="admin"),
-    url(r'^u/', include('user.urls'), name="user"),
+    url(r'^u/', include('user.urls')),
     url(r'^signup/', user_views.signup_view, name="signup"),
     url(r'^logoff/', user_views.logoff_user, name="logoff"),
     url(r'^login/$', user_views.login_user, name="login"),

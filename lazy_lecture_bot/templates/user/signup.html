@@ -5,8 +5,35 @@
 {% block content %}
 {{block.super}}
 
-<form method="POST" action=".">{% csrf_token %}
-	{{form.as_p}}
-	<input type="submit" value="Register"></input>
-</form>
+<div class="container">
+	<div class="row">
+		<div class="col-md-4 col-md-offset-4">
+			<div class="">
+				<form method="POST" action=".">{% csrf_token %}
+					<div class="form-group">
+						<label for="{{form.email.id_for_label}}">Email</label>
+						{{form.email}}
+						{{ form.email.errors }}
+					</div>
+					<div class="form-group">
+						<label for="{{form.username.id_for_label}}">Username</label>
+						{{form.username}}
+						{{ form.username.errors }}
+					</div>
+					<div class="form-group">
+						<label for="{{form.password.id_for_label}}">Password</label>
+						{{form.password}}
+						{{ form.password.errors }}
+					</div>
+					<div class="form-group">
+						<label for="{{form.password_confirm.id_for_label}}">Confirm Password</label>
+						{{form.confirm_password}}
+						{{form.confirm_password.errors}}
+					</div>
+					<input type="submit" value="Sign Up" class="btn btn-primary btn-block btn-lg"></input>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
 {% endblock content%}
