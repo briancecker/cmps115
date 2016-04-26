@@ -45,6 +45,23 @@ class Transcripts(models.Model):
         return self.transcript_id
 
 
+class Utterances(models.Model):
+    transcript_id = models.ForeignKey("Transcripts")
+    utterance_index = models.IntegerField()
+    start_time = models.FloatField()
+    end_time = models.FloatField()
+    text = models.TextField()
+
+
+class Tokens(models.Model):
+    utterance_id = models.ForeignKey("Utterances")
+    token_index = models.IntegerField()
+    start_tiem = models.FloatField()
+    end_time = models.FloatField()
+    # Possible overkill, but it's there I guess: https://en.wikipedia.org/wiki/Longest_word_in_English
+    text = models.CharField(max_length=35)
+
+
 class Annotation(models.Model):
     video_id = models.ForeignKey("Videos")
     segment_id = models.ForeignKey("Segments")
