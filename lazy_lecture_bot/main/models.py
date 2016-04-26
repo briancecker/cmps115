@@ -5,6 +5,7 @@ Definition of models.
 from django.db import models
 # Create your models here.
 from django.utils import timezone
+from lazy_lecture_bot import settings
 from lazy_lecture_bot.settings import BLOB_STORAGE_ROOT
 
 
@@ -12,6 +13,19 @@ class BlobStorage(models.Model):
     date = models.DateTimeField(default=timezone.now)
     # Restrict all possible file names to only those files in the BLOB_STORAGE_ROOT
     file_name = models.FilePathField(BLOB_STORAGE_ROOT, recursive=True)
+
+    def get_abs_path(self):
+        """
+        Get the absolute path to the file
+
+        Returns: Absoulte path
+
+        """
+        import os
+        date = self.date
+        return os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None),
+                                            str(date.year), str(date.month), str(date.day), self.file_name))
+
 
 
 class Videos(models.Model):

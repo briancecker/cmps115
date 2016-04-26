@@ -55,20 +55,6 @@ def read_bsr(year, month, day, file_hash):
     return os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None), year, month, day, file_hash))
 
 
-def blob_entry_to_path(blob_storage_entry):
-    """
-    Convert a BlobStorange database object to an absolute path
-    Args:
-        blob_storage_entry: The BlobStorage database object
-
-    Returns: Absoulte path
-
-    """
-    date = blob_storage_entry.date
-    return os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None), str(date.year), str(date.month),
-                                        str(date.day), blob_storage_entry.file_name))
-
-
 def file_to_hashed_name(file):
     """
     Hash an entire file to produce a filesystem compatible filename.
