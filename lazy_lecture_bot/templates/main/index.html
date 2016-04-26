@@ -5,26 +5,28 @@
 
 <div class="container">
 	<ul class="nav nav-tabs nav-justified">
-		<li class="active"><a href="#">Public Videos</a></li>
+		<li class="active"><a href="#">Recent Public Videos</a></li>
 		{% if request.user.is_authenticated %}
 		<li><a href="/">My Subcriptions</a></li>
 		<li><a href="/">My Favorites</a></li>
 		{% endif %}
 	</ul>
 	<div class="row" style="margin-top: 30px;">
+		{% for i in n %}
 		<!-- VIDEO PREVIEW -->
 		<div class="col-sm-3"> 
-			<div class="thumbnail">
-	      		<img src="..." alt="..." style="height: 140px; background-color: rgb(189, 195, 199)" />
-	      		<div class="caption">
-	        		<b><a href="#">Video Title 1</a></b>
-	        		<p>By Testname</p>
+			<div class="thumbnail" style="border-style: none;">
+	      		<a href="..."><img src='https://placeholdit.imgix.net/~text?txtsize=23&txt=250%C3%97140&w=254&h=140' alt="..." style="height: 140px; background-color: rgb(189, 195, 199)" /></a>
+	      		<div class="caption" style="padding: 10px 0px 0px 0px;">
+	        		<b><a href="...">Video Title {{i}}</a></b>
+	        		<div><a href="..." style="color:black">Testname</a></div>
 	        		<p>
 	        		07:00<br>
 	        		Posted on: 00/00/00</p>
 	      		</div>
 	      	</div>
 	    </div><!-- END OF VIDEO PREVIEW -->
+	    {% endfor %}
 	</div>
 </div>
 {% endblock content %}

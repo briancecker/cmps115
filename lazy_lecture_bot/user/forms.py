@@ -8,8 +8,8 @@ from django.contrib.auth import authenticate, login
 
 """""""""""""""""""""
 class LoginForm(forms.Form):
-	username = forms.CharField(widget=forms.TextInput(attrs={'class': "form-control"}), max_length=255, required=True)
-	password = forms.CharField(widget=forms.PasswordInput(attrs={'class': "form-control"}), required=True)
+	username = forms.CharField(widget=forms.TextInput(attrs={'class': "form-control",'placeholder':"Username"}), max_length=255, required=True)
+	password = forms.CharField(widget=forms.PasswordInput(attrs={'class': "form-control", 'placeholder':"Password"}), required=True)
 
 	def clean(self):
 		username = self.cleaned_data.get('username')
@@ -31,10 +31,10 @@ class LoginForm(forms.Form):
 
 """""""""""""""""""""
 class RegistrationForm(forms.Form):
-	email = forms.EmailField(required=True, widget=forms.TextInput(attrs={'class': "form-control"}))
-	username = forms.CharField(widget=forms.TextInput(attrs={'class': "form-control"}), max_length=255, required=True)
-	password = forms.CharField(widget=forms.PasswordInput(attrs={'class': "form-control"}), required=True)
-	confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': "form-control"}), required=True)
+	email = forms.EmailField(required=True, widget=forms.TextInput(attrs={'class': "form-control", 'placeholder':"email@example.com"}))
+	username = forms.CharField(widget=forms.TextInput(attrs={'class': "form-control", 'placeholder':"Username"}), max_length=255, required=True)
+	password = forms.CharField(widget=forms.PasswordInput(attrs={'class': "form-control", 'placeholder':"Password"}), required=True)
+	confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': "form-control", 'placeholder':"Confirm Password"}), required=True)
 
 	def clean_username(self): # Checks to see if user already exists	
 		try:
