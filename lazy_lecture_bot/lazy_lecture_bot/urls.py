@@ -27,4 +27,5 @@ urlpatterns = [
     url(r'^logoff/', user_views.logoff_user, name="logoff"),
     url(r'^login/$', user_views.login_user, name="login"),
     url(r'^login/auth_login/$', user_views.auth_login, name="auth_login"),
+    url(r'^watch/', include('videoapp.urls'), name="video_watch"),
 ]
