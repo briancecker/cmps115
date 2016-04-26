@@ -3,6 +3,9 @@ LazyLectureBot depends on the following external programs and libraries to funct
 the Setup phase.
 
 1. [ffmpeg](thttps://www.ffmpeg.org/) to strip audio from videos. 
+2. You need an IBM bluemix configuration file for the Watson voice-to-text service. This is a json file that should be 
+    placed as `resources/credentials/ibm_watson.json`. You can make your own account and get a credentials file or ask 
+    someone who already has it (Brian: becker@ucsc.edu)
 
 # Setup
 Commands you should execute and filenames/folders are surrounded with backticks, e.g. `execute this`, `/home/brian/`
