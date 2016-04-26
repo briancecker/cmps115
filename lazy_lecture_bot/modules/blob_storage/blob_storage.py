@@ -1,12 +1,10 @@
-import shutil
-
-import os
-
 import hashlib
-
+import os
+import shutil
 # Buffer size for reading files chunk by chunk
 from django.utils.datetime_safe import datetime
 from django.conf import settings
+from main.models import BlobStorage
 
 BUF_SIZE = 65536
 
@@ -19,7 +17,7 @@ def store_bsr(file, move_file=True):
         move_file: True to move the file from its old location to the new location in bsr. False to copy the file but
         leave it in the old location as well.
 
-    Returns: A tuple of (year, month, day, file_hash) defining the data needed to retrieve the file at a later time.
+    Returns: A tuple of (BlobStorage entry, file_hash, year, month, day)
 
     """
     file_name = file_to_hashed_name(file)
@@ -35,7 +33,11 @@ def store_bsr(file, move_file=True):
     else:
         shutil.copy(file, full_destination_path)
 
-    return (*date_path, file_name)
+    # Now enter database entries for the file
+    bs = BlobStorage(file_name=file_name)
+    bs.save()
+
+    return bs
 
 
 def read_bsr(year, month, day, file_hash):
@@ -73,4 +75,3 @@ def file_to_hashed_name(file):
             sha.update(data)
 
     return sha.hexdigest()
-
