@@ -32,13 +32,17 @@ class MaxSizeAudioSegmenter(AudioSegmenter):
         # Calculate the target number of frames for each segment
         n_frames = self.max_size - empty_bytes_size // bytes_per_frame
 
+        results = list()
         for segment in read_audio_frames(audio, n_frames):
             frames_in_segment = bytes_to_n_frames(segment, params["nchannels"], params["sampwidth"])
             segment_duration = frames_in_segment / params["framerate"]
-            tmp = NamedTemporaryFile("wb")
+            # Assume this will be moved and don't delete
+            tmp = NamedTemporaryFile("wb", delete=False)
             # nframes will be adjusted automatically by writeframes. Everything else is the same.
             wave_write = copy_audio_file_settings(audio, tmp.name)
             wave_write.writeframes(segment)
             wave_write.close()
 
-            yield tmp.name, segment_duration
+            results.append((tmp.name, segment_duration))
+
+        return results

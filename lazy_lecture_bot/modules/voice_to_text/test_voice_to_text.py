@@ -1,5 +1,7 @@
 import string
 
+import time
+
 import os
 import random
 import shutil
@@ -12,6 +14,7 @@ from modules.voice_to_text.audio_segmenter import AudioSegmenter
 from modules.voice_to_text.audio_transcriber import AudioTranscriber
 from modules.voice_to_text.max_size_audio_segmenter import MaxSizeAudioSegmenter
 from modules.voice_to_text.video_pipeline import VideoPipeline
+from modules.voice_to_text.watson.watson_video_pipeline import WatsonVideoPipeline
 from tempfile import NamedTemporaryFile
 
 
@@ -77,7 +80,7 @@ class RandomTranscriber(AudioTranscriber):
 
 class TestVideoPipeline(TestCase):
     def setUp(self):
-        test_video = file_utilities.abs_resource_path(["test_videos", "cpp_example.mp4"])
+        test_video = file_utilities.abs_resource_path(["test_videos", "30_sec_cpp_example.mp4"])
 
         # Going to move the test_video, so copy it first
         tmp = NamedTemporaryFile(delete=False)
@@ -124,6 +127,21 @@ class TestVideoPipeline(TestCase):
         self.assertEqual(Utterances.objects.count(), self.n_segments * self.transcriber.n_utterances)
         self.assertEqual(Tokens.objects.count(),
                          self.n_segments * self.transcriber.n_utterances * self.transcriber.n_tokens)
+
+    def test_watson_processing(self):
+        vp = WatsonVideoPipeline()
+        vp.process_video(self.test_video)
+
+        self.assertEqual(Videos.objects.count(), 1)
+        self.assertEqual(Segments.objects.count(), 1)
+        self.assertEqual(Transcripts.objects.count(), 1)
+        self.assertGreater(Utterances.objects.count(), 1)
+        self.assertGreater(Tokens.objects.count(), 1)
+
+        # Print some debug text
+        # print(Transcripts.objects.all()[0].text)
+        # print(Utterances.objects.all()[0].text)
+        # print(Tokens.objects.all()[0].text)
 
 
 class TestMaxSizeAudioSegmenter(TestCase):

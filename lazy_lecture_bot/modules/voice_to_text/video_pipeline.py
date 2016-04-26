@@ -112,10 +112,13 @@ class VideoPipeline:
 
         """
         audio = self._strip_audio(video)
+        # WARNING: self._store_video_and_audio will move video and audio files!
         db_video = self._store_video_and_audio(video, audio)
-        audio_segments = self.audio_segmenter.segment(audio)
+        audio_segments = self.audio_segmenter.segment(db_video.audio_blob.get_abs_path())
+        # WARNING: self._store_segments will move the audio_segments!
         db_segments = self._store_segments(db_video, audio_segments)
-        transcripts = [self.audio_transcriber.transcribe(segment[0]) for segment in audio_segments]
+        audio_segment_blobs = [db_segment.audio_blob.get_abs_path() for db_segment in db_segments]
+        transcripts = [self.audio_transcriber.transcribe(segment) for segment in audio_segment_blobs]
         self._store_transcripts(db_video, db_segments, transcripts)
         db_video.finished_processing = True
         db_video.save()
