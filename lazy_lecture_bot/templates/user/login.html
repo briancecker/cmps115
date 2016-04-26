@@ -7,7 +7,7 @@
 
 <div class="container">
 	<div class="row">
-		<div class="col-md-4 col-md-offset-4">
+		<div class="col-md-4 col-md-offset-4" style="padding: 40px 40px 40px 40px;">
 			<div class="">
 				<form method="POST" action=".">{% csrf_token %}
 					<div class="form-group">
@@ -20,7 +20,7 @@
 						<label for="{{form.password.id_for_label}}">Password</label>
 						{{form.password}}
 					</div>
-					<input type="submit" value="Log In" class="btn btn-primary btn-block btn-lg"></input>
+					<input type="submit" value="Log In" class="btn btn-primary btn-block btn-lg" style="border-radius: 0px;"></input>
 				</form>
 			</div>
 		</div>
