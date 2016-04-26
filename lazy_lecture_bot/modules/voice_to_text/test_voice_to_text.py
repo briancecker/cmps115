@@ -6,7 +6,7 @@ import shutil
 from django.test import TestCase
 from django.utils import timezone
 from lazy_lecture_bot.settings import BLOB_STORAGE_ROOT
-from main.models import Videos, Segments, Transcripts, BlobStorage
+from main.models import Videos, Segments, Transcripts, BlobStorage, Utterances, Tokens
 from modules import file_utilities
 from modules.voice_to_text.audio_segmenter import AudioSegmenter
 from modules.voice_to_text.audio_transcriber import AudioTranscriber
@@ -52,8 +52,27 @@ class RandomSegmenter(AudioSegmenter):
 
 
 class RandomTranscriber(AudioTranscriber):
+    def __init__(self, n_utterances=5, n_tokens=15):
+        super().__init__()
+        self.n_utterances = n_utterances
+        self.n_tokens = n_tokens
+
     def transcribe(self, audio):
-        return ''.join(random.choice(string.ascii_lowercase) for i in range(15))
+        result = {"transcript": "The entire segment transcript!",
+                  "utterances": list()}
+        for _ in range(self.n_utterances):
+            utterance = {"transcript": "The utterance transcript",
+                         "start": 0.0,
+                         "end": 5.0,
+                         "tokens": list()}
+            for _ in range(self.n_tokens):
+                utterance["tokens"].append({"token": ''.join(random.choice(string.ascii_lowercase)
+                                                             for _ in range(15)),
+                                            "start": 0.0,
+                                            "end": 5.0})
+            result["utterances"].append(utterance)
+
+        return result
 
 
 class TestVideoPipeline(TestCase):
@@ -67,7 +86,7 @@ class TestVideoPipeline(TestCase):
 
         self.n_segments = 10
         self.segmenter = RandomSegmenter(self.n_segments)
-        self.transcriber = RandomTranscriber()
+        self.transcriber = RandomTranscriber(n_utterances=5, n_tokens=15)
 
         today = timezone.now()
         self.blob_dir = os.path.join(BLOB_STORAGE_ROOT, str(today.year), str(today.month), str(today.day))
@@ -102,6 +121,9 @@ class TestVideoPipeline(TestCase):
         self.assertEqual(Transcripts.objects.count(), self.n_segments)
         # 2 for the original video and audio + the number of segments made
         self.assertEqual(BlobStorage.objects.count(), 2 + self.n_segments)
+        self.assertEqual(Utterances.objects.count(), self.n_segments * self.transcriber.n_utterances)
+        self.assertEqual(Tokens.objects.count(),
+                         self.n_segments * self.transcriber.n_utterances * self.transcriber.n_tokens)
 
 
 class TestMaxSizeAudioSegmenter(TestCase):

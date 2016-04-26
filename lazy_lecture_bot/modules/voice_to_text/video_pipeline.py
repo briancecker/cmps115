@@ -1,5 +1,5 @@
 from abc import ABCMeta
-from main.models import Videos, Segments, Transcripts
+from main.models import Videos, Segments, Transcripts, Utterances, Tokens
 from modules.blob_storage.blob_storage import store_bsr
 from modules.video_processing import video_processing
 
@@ -76,19 +76,28 @@ class VideoPipeline:
 
         return db_segments
 
-    def _store_transcripts(self, db_video, db_segments, transcriptions):
+    def _store_transcripts(self, db_video, db_segments, transcripts):
         """
         Store each transcription according to its corresponding segment_id
         Args:
             db_video: The Videos entry of the video that owns these segments
             db_segments: The list of Segments entries that correspond to each transcription
-            transcriptions: The transcription objects (TODO: should be something other than strings eventually)
+            transcripts: The transcript dictionaries
         Returns:
 
         """
-        for db_segment, transcript in zip(db_segments, transcriptions):
-            db_trans = Transcripts(video_id=db_video, segment_id=db_segment, text=transcript)
+        for db_segment, transcript in zip(db_segments, transcripts):
+            db_trans = Transcripts(video_id=db_video, segment_id=db_segment, text=transcript["transcript"])
             db_trans.save()
+            for utterance_index, utterance in enumerate(transcript["utterances"]):
+                db_utterance = Utterances(transcript_id=db_trans, utterance_index=utterance_index,
+                                          start_time=utterance["start"], end_time=utterance["end"],
+                                          text=utterance["transcript"])
+                db_utterance.save()
+                for token_index, token in enumerate(utterance["tokens"]):
+                    db_token = Tokens(utterance_id=db_utterance, token_index=token_index, start_time=token["start"],
+                                      end_time=token["end"], text=token["token"])
+                    db_token.save()
 
     def process_video(self, video):
         """
@@ -106,8 +115,8 @@ class VideoPipeline:
         db_video = self._store_video_and_audio(video, audio)
         audio_segments = self.audio_segmenter.segment(audio)
         db_segments = self._store_segments(db_video, audio_segments)
-        transcriptions = [self.audio_transcriber.transcribe(segment[0]) for segment in audio_segments]
-        self._store_transcripts(db_video, db_segments, transcriptions)
+        transcripts = [self.audio_transcriber.transcribe(segment[0]) for segment in audio_segments]
+        self._store_transcripts(db_video, db_segments, transcripts)
         db_video.finished_processing = True
         db_video.save()
 
