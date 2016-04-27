@@ -1,9 +1,17 @@
+import logging
+
+import shutil
+
+from tempfile import NamedTemporaryFile
+
 import importlib
 from abc import ABCMeta
 from lazy_lecture_bot.celery import app
 from main.models import Videos, Segments, Transcripts, Utterances, Tokens
 from modules.blob_storage.blob_storage import store_bsr
 from modules.video_processing import video_processing
+
+logger = logging.getLogger("django")
 
 
 class VideoPipelineException(Exception):
@@ -72,23 +80,26 @@ def _construct_from_class_information(cls_info):
 
 @app.task(name="process_video_async")
 def process_video_async(video_id, audio_segmenter_info, audio_transcriber_info):
+    logger.info("started async processing for video_id: {0}".format(video_id))
     # Construct the segmenter and transcriber we need
     audio_segmenter = _construct_from_class_information(audio_segmenter_info)
     audio_transcriber = _construct_from_class_information(audio_transcriber_info)
 
     # Get the relevant video and process
     video = Videos.objects.all().get(pk=video_id)
+    logger.info("segmenting")
     audio_segments = audio_segmenter.segment(video.audio_blob.get_abs_path())
     # WARNING: self._store_segments will move the audio_segments!
     db_segments = store_segments(video, audio_segments)
     audio_segment_blobs = [db_segment.audio_blob.get_abs_path() for db_segment in db_segments]
+    logger.info("transcribing {0} segments".format(len(audio_segment_blobs)))
     transcripts = [audio_transcriber.transcribe(segment) for segment in audio_segment_blobs]
     store_transcripts(video, db_segments, transcripts)
 
     video.finished_processing = True
     video.save()
 
-    return "Done async processing video with id: {0}".format(video.id)
+    logger.info("Done async processing video with id: {0}".format(video.id))
 
 
 class VideoPipeline:
@@ -152,9 +163,9 @@ class VideoPipeline:
 
         """
         # Copy for testing. In production this won't be needed
-        # tmp = NamedTemporaryFile(delete=False)
-        # shutil.copy(video, tmp.name)
-        # video = tmp.name
+        tmp = NamedTemporaryFile(delete=False)
+        shutil.copy(video, tmp.name)
+        video = tmp.name
 
         audio = self._strip_audio(video)
         # WARNING: self._store_video_and_audio will move video and audio files!
