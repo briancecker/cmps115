@@ -1,11 +1,10 @@
 import string
-
 import time
 
 import os
 import random
 import shutil
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from lazy_lecture_bot.settings import BLOB_STORAGE_ROOT
 from main.models import Videos, Segments, Transcripts, BlobStorage, Utterances, Tokens
@@ -19,7 +18,7 @@ from tempfile import NamedTemporaryFile
 
 
 class RandomSegmenter(AudioSegmenter):
-    def __init__(self, n_segments):
+    def __init__(self, n_segments=5):
         self.files = list()
         self.file_size = 5120
         self.n_segments = n_segments
@@ -87,6 +86,7 @@ class TestVideoPipeline(TestCase):
         self.test_video = tmp.name
         shutil.copy(test_video, self.test_video)
 
+        # Setup fake segmenter and transcriber
         self.n_segments = 10
         self.segmenter = RandomSegmenter(self.n_segments)
         self.transcriber = RandomTranscriber(n_utterances=5, n_tokens=15)
@@ -111,12 +111,26 @@ class TestVideoPipeline(TestCase):
                     if os.path.exists(file_path):
                         os.remove(file_path)
 
+    @override_settings(CELERY_ALWAYS_EAGER=True,
+                       CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                       BROKER_BACKEND='memory')
     def test_processing(self):
         vp = VideoPipeline()
 
         vp.audio_segmenter = self.segmenter
         vp.audio_transcriber = self.transcriber
-        vp.process_video(self.test_video)
+        video = vp.process_video(self.test_video)
+        self.assertTrue(video is not None)
+
+        # Might take a second for the Celery task to finish
+        slept = 0
+        while not video.finished_processing and slept < 5:
+            time.sleep(1)
+            slept += 1
+            video.refresh_from_db()
+
+        # Should definitely be finished by now
+        self.assertTrue(video.finished_processing)
 
         # Check that we have the write number of entries everywhere
         self.assertEqual(Videos.objects.count(), 1)
@@ -128,9 +142,23 @@ class TestVideoPipeline(TestCase):
         self.assertEqual(Tokens.objects.count(),
                          self.n_segments * self.transcriber.n_utterances * self.transcriber.n_tokens)
 
+    @override_settings(CELERY_ALWAYS_EAGER=True,
+                       CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                       BROKER_BACKEND='memory')
     def test_watson_processing(self):
         vp = WatsonVideoPipeline()
-        vp.process_video(self.test_video)
+        video = vp.process_video(self.test_video)
+        self.assertTrue(video is not None)
+
+        # It might take quite some time for the Celery task to finish. This depends on internet connection.
+        slept = 0
+        while not video.finished_processing and slept < 120:
+            time.sleep(1)
+            slept += 1
+            video.refresh_from_db()
+
+        # Should definitely be finished by now
+        self.assertTrue(video.finished_processing)
 
         self.assertEqual(Videos.objects.count(), 1)
         self.assertEqual(Segments.objects.count(), 1)

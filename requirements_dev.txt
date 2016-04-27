@@ -2,3 +2,5 @@ django>=1.9.5
 pymysql>=0.7.2
 wave>=0.0.2
 requests>=2.8.1
+celery>=3.1.18
+redis>=2.10.5
