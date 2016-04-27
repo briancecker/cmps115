@@ -15,7 +15,7 @@ def show_user(request, username="None"):
 	if username is not "None":
 		user_instance = get_object_or_404(User,  username=username)
 	else:
-		if request.user.is_active: # ----------------------------- FIX THIS
+		if request.user.is_active:
 			user_instance = request.user
 		else:
 			return redirect("login")
