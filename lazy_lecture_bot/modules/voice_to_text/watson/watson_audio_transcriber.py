@@ -1,6 +1,5 @@
 from modules.voice_to_text.audio_transcriber import AudioTranscriber
-from modules.voice_to_text.watson.voice_to_text import get_credentials
-from modules.voice_to_text.watson.voice_to_text import transcribe_file
+from modules.voice_to_text.watson.voice_to_text import get_credentials, transcribe
 
 
 class WatsonAudioTranscriber(AudioTranscriber):
@@ -9,7 +8,7 @@ class WatsonAudioTranscriber(AudioTranscriber):
         self.credentials = get_credentials()
 
     def transcribe(self, audio):
-        watson_transcript = transcribe_file(audio, self.credentials)
+        watson_transcript = transcribe(audio, self.credentials)
 
         transcript = {"transcript": "", "utterances": list()}
         # transcript is now available, but we need to put it in the right format

@@ -1,14 +1,12 @@
 import logging
-
-import shutil
-
-from tempfile import NamedTemporaryFile
+import wave
 
 import importlib
+import io
 from abc import ABCMeta
 from lazy_lecture_bot.celery import app
 from main.models import Videos, Segments, Transcripts, Utterances, Tokens
-from modules.blob_storage.blob_storage import store_bsr
+from modules.blob_storage.blob_storage import store_bsr_data
 from modules.video_processing import video_processing
 
 logger = logging.getLogger("django")
@@ -30,7 +28,7 @@ def store_segments(db_video, segments):
     """
     db_segments = list()
     for segment_index, (segment, segment_duration) in enumerate(segments):
-        audio_blob = store_bsr(segment)
+        audio_blob = store_bsr_data(segment)
         db_segment = Segments(video_id=db_video, segment_index=segment_index,
                               segment_duration=segment_duration,
                               audio_blob=audio_blob)
@@ -85,21 +83,22 @@ def process_video_async(video_id, audio_segmenter_info, audio_transcriber_info):
     audio_segmenter = _construct_from_class_information(audio_segmenter_info)
     audio_transcriber = _construct_from_class_information(audio_transcriber_info)
 
+
     # Get the relevant video and process
     video = Videos.objects.all().get(pk=video_id)
+
     logger.info("segmenting")
-    audio_segments = audio_segmenter.segment(video.audio_blob.get_abs_path())
-    # WARNING: self._store_segments will move the audio_segments!
+    audio_segments = audio_segmenter.segment(video.audio_blob.get_blob())
+
     db_segments = store_segments(video, audio_segments)
-    audio_segment_blobs = [db_segment.audio_blob.get_abs_path() for db_segment in db_segments]
-    logger.info("transcribing {0} segments".format(len(audio_segment_blobs)))
-    transcripts = [audio_transcriber.transcribe(segment) for segment in audio_segment_blobs]
+    logger.info("transcribing {0} segments".format(len(db_segments)))
+    transcripts = [audio_transcriber.transcribe(segment.audio_blob.get_blob()) for segment in db_segments]
     store_transcripts(video, db_segments, transcripts)
 
     video.finished_processing = True
     video.save()
 
-    logger.info("Done async processing video with id: {0}".format(video.id))
+    # logger.info("Done async processing video with id: {0}".format(video.id))
 
 
 class VideoPipeline:
@@ -126,11 +125,11 @@ class VideoPipeline:
         Returns: audio from video as a file path
 
         """
-        audio_file, return_code = video_processing.strip_audio(video)
+        audio, return_code = video_processing.strip_audio(video)
         if return_code != 0:
             raise VideoPipelineException("ffmpeg returned non-zero error code. Returned code: {0}".format(return_code))
 
-        return audio_file
+        return audio
 
     def _store_video_and_audio(self, video, audio):
         """
@@ -142,8 +141,8 @@ class VideoPipeline:
         Returns: the Videos entry
 
         """
-        video_blob = store_bsr(video)
-        audio_blob = store_bsr(audio)
+        video_blob = store_bsr_data(video)
+        audio_blob = store_bsr_data(audio)
 
         # Need to do something with user_id and finished_processing
         self.video = Videos(audio_blob=audio_blob, video_blob=video_blob, user_id=1, finished_processing=False)
@@ -157,18 +156,14 @@ class VideoPipeline:
         processed, check that the "finished_processing" field of the Videos entry returned from this function is set
         to true.
         Args:
-            video: The path to a video file to process.
+            video: The video file as bytes
 
         Returns: The Videos entry created in the database.
 
         """
-        # Copy for testing. In production this won't be needed
-        tmp = NamedTemporaryFile(delete=False)
-        shutil.copy(video, tmp.name)
-        video = tmp.name
-
         audio = self._strip_audio(video)
-        # WARNING: self._store_video_and_audio will move video and audio files!
+        wave_read = wave.open(io.BytesIO(audio), 'rb')
+        print(wave_read.getnframes())
         self._store_video_and_audio(video, audio)
 
         # Can't pass objects directly, so we have to deconstruct the object into interpretable and serializable parts

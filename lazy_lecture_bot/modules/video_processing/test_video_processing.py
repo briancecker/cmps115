@@ -1,9 +1,9 @@
-import wave
-
-import os
 import subprocess
 import unittest
+import wave
 
+import io
+import os
 from modules import file_utilities
 
 
@@ -20,14 +20,17 @@ class VideoProcessingTest(unittest.TestCase):
         test_video = file_utilities.abs_resource_path(["test_videos", "cpp_example.mp4"])
         self.assertTrue(os.path.exists(test_video))
 
-        audio_f, return_code = strip_audio(test_video)
+        print("reading video...")
+        with open(test_video, "rb") as fh:
+            video = fh.read()
+        print("Done reading video")
+        audio, return_code = strip_audio(video)
+
         self.assertEqual(return_code, 0)
 
-        with wave.open(audio_f, 'rb') as wave_read:
+        with wave.open(io.BytesIO(audio), 'rb') as wave_read:
             self.assertEqual(wave_read.getframerate(), 16000)
-            self.assertEqual(wave_read.getnframes(), 3775007)
-
-        os.remove(audio_f)
+            self.assertEqual(wave_read.getnframes(), 1073741823)
 
     def test_audio_segmenting(self):
         from modules.video_processing.video_processing import read_audio_segments_by_time

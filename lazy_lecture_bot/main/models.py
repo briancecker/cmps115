@@ -6,25 +6,30 @@ from django.db import models
 # Create your models here.
 from django.utils import timezone
 from django.conf import settings
+from modules.blob_storage.blob_settings import block_blob_service
 
 
 class BlobStorage(models.Model):
     date = models.DateTimeField(default=timezone.now)
     # Restrict all possible file names to only those files in the BLOB_STORAGE_ROOT
-    file_name = models.FilePathField(getattr(settings, "BLOB_STORAGE_ROOT"), recursive=True)
+    file_name = models.URLField()
 
-    def get_abs_path(self):
+    def get_blob(self):
         """
-        Get the absolute path to the file
+        Get the actual blob object
 
-        Returns: Absoulte path
+        Returns: Get the blob as bytes
 
         """
-        import os
-        date = self.date
-        return os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None),
-                                            str(date.year), str(date.month), str(date.day), self.file_name))
-
+        blob_type = getattr(settings, "BLOB_STORAGE_TYPE")
+        if blob_type == "local":
+            import os
+            date = self.date
+            with open(os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None), str(date.year),
+                                                   str(date.month), str(date.day), self.file_name)), 'rb') as fh:
+                return fh.read()
+        elif blob_type == "azure":
+            return block_blob_service.get_blob_to_bytes("blobs", self.file_name)
 
 
 class Videos(models.Model):
