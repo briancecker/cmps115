@@ -11,7 +11,6 @@ SAMPLE_RATE = 16000
 STRIP_AUDIO_CMD = "ffmpeg -vcodec h264 -acodec aac -i - -y -ab 160k -ac {num_channels} -ar {sample_rate} " \
                   "-vn -sample_fmt {sample_fmt} -f wav -".format(num_channels=NUM_CHANNELS, sample_rate=SAMPLE_RATE,
                                                                  sample_fmt=SAMPLE_FORMAT)
-print(STRIP_AUDIO_CMD)
 
 logger = logging.Logger("django")
 

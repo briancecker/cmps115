@@ -6,7 +6,7 @@ from django.db import models
 # Create your models here.
 from django.utils import timezone
 from django.conf import settings
-from modules.blob_storage.blob_settings import block_blob_service
+from modules.blob_storage import blob_settings
 
 
 class BlobStorage(models.Model):
@@ -29,7 +29,7 @@ class BlobStorage(models.Model):
                                                    str(date.month), str(date.day), self.file_name)), 'rb') as fh:
                 return fh.read()
         elif blob_type == "azure":
-            return block_blob_service.get_blob_to_bytes("blobs", self.file_name)
+            return blob_settings.block_blob_service.get_blob_to_bytes("blobs", self.file_name)
 
 
 class Videos(models.Model):

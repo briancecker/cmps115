@@ -1,11 +1,11 @@
 import hashlib
 import os
 # Buffer size for reading files chunk by chunk
-from azure.storage.file import ContentSettings
+from azure.storage.blob import ContentSettings
 from django.utils.datetime_safe import datetime
 from django.conf import settings
 from main.models import BlobStorage
-from modules.blob_storage.blob_settings import block_blob_service
+from modules.blob_storage import blob_settings
 
 BUF_SIZE = 65536
 
@@ -22,6 +22,15 @@ if BLOB_TYPE == "local":
 
 
     def store_bsr_data(data, extension=""):
+        """
+        Store data into blob storage.
+        Args:
+            data: The data as a writable bytes string
+            extension: The optional file extension
+
+        Returns: The BlobStorage entry in the database
+
+        """
         file_name = data_to_hashed_name(data, extension)
         with open(_make_bsr_path(file_name), 'wb') as fh:
             fh.write(data)
@@ -34,9 +43,19 @@ if BLOB_TYPE == "local":
 
 elif BLOB_TYPE == "azure":
     def store_bsr_data(data, extension=""):
+        """
+        Store data into blob storage.
+        Args:
+            data: The data as a writable bytes string
+            extension: The optional file extension
+
+        Returns: The BlobStorage entry in the database
+
+        """
         file_name = data_to_hashed_name(data, extension)
-        block_blob_service.create_blob_from_bytes("blobs", file_name, data,
-                                                  content_settings=ContentSettings(content_type='audio/wav'))
+        blob_settings.block_blob_service.create_blob_from_bytes("blobs", file_name, data,
+                                                                content_settings=ContentSettings(
+                                                                    content_type='audio/wav'))
 
         bs = BlobStorage(file_name=file_name)
         bs.save()

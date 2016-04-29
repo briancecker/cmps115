@@ -168,7 +168,9 @@ class TestVideoPipeline(TestCase):
 class TestMaxSizeAudioSegmenter(TestCase):
     def test_segment(self):
         segmenter = MaxSizeAudioSegmenter()
-        video = file_utilities.abs_resource_path(["test_videos", "16Khz_50_sec_audio_cpp_example.mp4.wav"])
+        with open(file_utilities.abs_resource_path(
+                ["test_videos", "16Khz_50_sec_audio_cpp_example.mp4.wav"]), 'rb') as fh:
+            video = fh.read()
         segments = list(segmenter.segment(video))
         # There should only be one segment
         self.assertEqual(len(segments), 1)

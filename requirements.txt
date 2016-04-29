@@ -6,4 +6,4 @@ celery>=3.1.18
 redis>=2.10.5
 dj-database-url>=0.4.1
 psycopg2>=2.6.1
-azure>=1.0.3
+azure-storage

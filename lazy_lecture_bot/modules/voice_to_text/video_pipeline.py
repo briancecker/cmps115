@@ -21,9 +21,9 @@ def store_segments(db_video, segments):
     Store each segment in the database.
     Args:
         db_video: The Videos entry
-        segments: Each segment as a file path
+        segments: Each segment as an audio file in memory (bytes)
 
-    Returns: A list of segment ids corresponding to the segments argument
+    Returns: A list of database Segments entries
 
     """
     db_segments = list()
@@ -45,7 +45,7 @@ def store_transcripts(db_video, db_segments, transcripts):
         db_video: The Videos entry of the video that owns these segments
         db_segments: The list of Segments entries that correspond to each transcription
         transcripts: The transcript dictionaries
-    Returns:
+    Returns: None
 
     """
     for db_segment, transcript in zip(db_segments, transcripts):
@@ -78,6 +78,20 @@ def _construct_from_class_information(cls_info):
 
 @app.task(name="process_video_async")
 def process_video_async(video_id, audio_segmenter_info, audio_transcriber_info):
+    """
+    Finish processing the video asynchronously as a celery task.
+    We have to pass json serializable arguments to this task, so we have to make some strange argument decisions.
+    For instance, in order to pass our audio segmenter and transcriber, we need to record the information to reconstruct
+    them and pass this infromation instead of the actual objects. We use the functions _get_class_information and
+    _construct_from_class_information to do this.
+    Args:
+        video_id: The id of the video to process
+        audio_segmenter_info: The result of calling _get_class_information on the audio segmenter
+        audio_transcriber_info: The result of calling _get_class_information on the audio segmenter
+
+    Returns:
+
+    """
     logger.info("started async processing for video_id: {0}".format(video_id))
     # Construct the segmenter and transcriber we need
     audio_segmenter = _construct_from_class_information(audio_segmenter_info)
@@ -106,8 +120,8 @@ class VideoPipeline:
     Base class for video pipelines.
 
     Derived classes should provide the following objects:
-        self.audio_segmenter: Given an audio file, segment it into appropriate sized pieces.
-        self.audio_transcriber: Given an audio file, return a transcription dictionary.
+        self.audio_segmenter: Given an audio file in memory (as bytes), segment it into appropriate sized pieces.
+        self.audio_transcriber: Given an audio file in memory (as bytes), return a transcription dictionary.
     """
     __metaclass__ = ABCMeta
 
@@ -118,11 +132,12 @@ class VideoPipeline:
 
     def _strip_audio(self, video):
         """
+        Get the audio from a video
 
         Args:
-            video:
+            video: The video as bytes
 
-        Returns: audio from video as a file path
+        Returns: audio as bytes
 
         """
         audio, return_code = video_processing.strip_audio(video)
@@ -133,10 +148,10 @@ class VideoPipeline:
 
     def _store_video_and_audio(self, video, audio):
         """
-        Store the audio and video files and setup Videos entry in database.
+        Store the audio and video data and setup Videos entry in database.
         Args:
-            video: file path to video
-            audio: file path to audio
+            video: video as bytes
+            audio: audio as bytes
 
         Returns: the Videos entry
 
