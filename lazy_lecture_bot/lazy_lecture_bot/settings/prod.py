@@ -12,8 +12,8 @@ BLOB_STORAGE_TYPE = "azure"
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', "fierce-plains-23392.herokuapp.com"]
 
 # Use redis as the celery broker
-BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+BROKER_URL = os.environ["REDISCLOUD_URL"]
+CELERY_RESULT_BACKEND = os.environ["REDISCLOUD_URL"]
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
