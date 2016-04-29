@@ -29,6 +29,7 @@ class BlobStorage(models.Model):
 
 
 class Videos(models.Model):
+    title = models.CharField()
     audio_blob = models.ForeignKey("BlobStorage", related_name="audio_path")
     video_blob = models.ForeignKey("BlobStorage", related_name="video_path")
     user_id = models.IntegerField()
