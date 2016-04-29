@@ -1,4 +1,5 @@
 import json
+import os
 
 import requests
 from modules import file_utilities
@@ -7,8 +8,15 @@ CREDENTIALS_PATH = file_utilities.abs_resource_path(["credentials", "ibm_watson.
 
 
 def get_credentials():
-    with open(CREDENTIALS_PATH, 'r') as fh:
-        credentials = json.load(fh)["credentials"]
+    if "watson_url" not in os.environ or "watson_password" not in os.environ or "watson_username" not in os.environ:
+        with open(CREDENTIALS_PATH, 'r') as fh:
+            credentials = json.load(fh)["credentials"]
+    else:
+        credentials = {
+            "url": os.environ["watson_url"],
+            "username": os.environ["watson_username"],
+            "password": os.environ["watson_password"],
+        }
 
     return credentials
 
