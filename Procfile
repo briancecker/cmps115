@@ -1,1 +1,1 @@
-web: gunicorn lazy_lecture_bot.wsgi --log-file -
+web: gunicorn lazy_lecture_bot.wsgi --pythonpath lazy_lecture_bot/ --log-file -
