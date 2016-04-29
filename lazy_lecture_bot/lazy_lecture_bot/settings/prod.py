@@ -9,7 +9,7 @@ DATABASES = {
 
 BLOB_STORAGE_TYPE = "azure"
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']  #, '111.222.333.444', 'mywebsite.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', "fierce-plains-23392.herokuapp.com"]
 
 # Use redis as the celery broker
 BROKER_URL = 'redis://localhost:6379'
