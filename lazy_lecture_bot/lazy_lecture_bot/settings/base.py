@@ -124,7 +124,6 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_collected')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
-    '/var/www/static/',
 ]
 
 # And one more static files thing... I'm honestly not quite sure I understand this one, but see this link:
