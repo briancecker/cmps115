@@ -4,7 +4,7 @@ from .base import *
 DEBUG = False
 
 DATABASES = {
-    'default': dj_database_url.config(),
+    'default': dj_database_url.config(conn_max_age=500),
 }
 
 BLOB_STORAGE_TYPE = "azure"

@@ -121,10 +121,18 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_collected')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
     '/var/www/static/',
 ]
+
+# And one more static files thing... I'm honestly not quite sure I understand this one, but see this link:
+#   https://devcenter.heroku.com/articles/django-app-configuration#Whitenoise
+# Simplified static file serving.
+# https://warehouse.python.org/project/whitenoise/
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+
 # Define space to store blob files
 # see the wiki for more information: https://github.com/briancecker/cmps115/wiki/Blob-and-Video-Storage/
 BLOB_STORAGE_ROOT = os.path.join(file_utilities.TMP_DIR, "BLOB_STORAGE_ROOT")
