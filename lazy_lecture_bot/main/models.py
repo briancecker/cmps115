@@ -30,6 +30,8 @@ class BlobStorage(models.Model):
                 return fh.read()
         elif blob_type == "azure":
             return blob_settings.block_blob_service.get_blob_to_bytes("blobs", self.file_name)
+        elif blob_type == "s3":
+            return blob_settings.boto3_client.get_object(Key=self.file_name, Bucket="lazylecturebot")["Body"].read()
 
 
 class Videos(models.Model):

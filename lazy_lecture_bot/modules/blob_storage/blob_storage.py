@@ -62,6 +62,27 @@ elif BLOB_TYPE == "azure":
 
         return bs
 
+elif BLOB_TYPE == "s3":
+    def store_bsr_data(data, extension="", file_prefix=""):
+            """
+            Store data into blob storage.
+            Args:
+                data: The data as a writable bytes string
+                extension: The optional file extension
+                file_prefix: A file prefix, such as the user id
+
+            Returns: The BlobStorage entry in the database
+
+            """
+            file_name = data_to_hashed_name(data, extension) + file_prefix
+            blob_settings.boto3_client.put_object(Key=file_name, Body=data, Bucket="lazylecturebot")
+
+            bs = BlobStorage(file_name=file_name)
+            bs.save()
+
+            return bs
+
+
 
 def data_to_hashed_name(data, extension):
     return hashlib.sha256(data).hexdigest() + "." + extension

@@ -7,7 +7,7 @@ DATABASES = {
     'default': dj_database_url.config(conn_max_age=500),
 }
 
-BLOB_STORAGE_TYPE = "azure"
+BLOB_STORAGE_TYPE = "s3"
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', "fierce-plains-23392.herokuapp.com"]
 

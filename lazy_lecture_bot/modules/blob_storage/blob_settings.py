@@ -1,5 +1,6 @@
 import json
 
+import boto3
 import os
 from azure.storage.blob import BlockBlobService
 from django.conf import settings
@@ -24,3 +25,5 @@ elif BLOB_STORAGE_TYPE == "azure":
 
     account, key = get_credentials()
     block_blob_service = BlockBlobService(account_name=account, account_key=key)
+elif BLOB_STORAGE_TYPE == "s3":
+    boto3_client = boto3.client("s3")

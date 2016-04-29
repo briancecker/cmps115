@@ -32,5 +32,7 @@ class BlobStorageTest(TestCase):
         os.removedirs(self.test_path)
 
     def test_store(self):
-        with open(file_utilities.abs_resource_path(["test_videos", "30_sec_cpp_example.mp4"]), "rb") as fh:
-            blob_storage.store_bsr_data(fh.read(), "wav")
+        test_bytes = b"This is a test string!"
+        bs = blob_storage.store_bsr_data(test_bytes)
+        retrieved_bytes = bs.get_blob()
+        self.assertEqual(test_bytes, retrieved_bytes)
