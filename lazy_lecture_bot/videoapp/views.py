@@ -30,8 +30,6 @@ def upload_view(request):
 		video_title = request.POST["title"]
 		video_description = request.POST["description"]
 		public_access = request.POST["publicAccess"]
-		video = request.FILES
-		print(video)
-
+		video = request.FILES["uploadedFile"]
 	context= {}
 	return render(request, "videoapp/upload.html", context)
