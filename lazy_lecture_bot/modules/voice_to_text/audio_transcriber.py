@@ -11,9 +11,9 @@ class AudioTranscriber:
         """
         Transcribe an audio clip into text.
         Args:
-            audio: Path to the audio clip
+            audio: The audio file loaded as bytes. You might do this by loading the file using open(file, "rb").
 
-        Returns:
-
+        Returns: A dictionary describing the transcript as shown in the AudioTranscriber section of the wiki:
+            https://github.com/briancecker/cmps115/wiki/Video-Pipeline-Objects
         """
         raise NotImplementedError("transcribe is not implemented")

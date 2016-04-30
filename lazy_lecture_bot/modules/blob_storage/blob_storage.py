@@ -1,58 +1,91 @@
 import hashlib
 import os
-import shutil
 # Buffer size for reading files chunk by chunk
+from azure.storage.blob import ContentSettings
 from django.utils.datetime_safe import datetime
 from django.conf import settings
 from main.models import BlobStorage
+from modules.blob_storage import blob_settings
 
 BUF_SIZE = 65536
 
+BLOB_TYPE = getattr(settings, "BLOB_STORAGE_TYPE")
+if BLOB_TYPE == "local":
+    def _make_bsr_path(file_name):
+        current_date = datetime.utcnow()
+        date_path = (current_date.year, current_date.month, current_date.day)
+        bsr_path = os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None), *map(str, date_path)))
+        if not os.path.exists(bsr_path):
+            os.makedirs(bsr_path)
 
-def store_bsr(file, move_file=True):
-    """
-    Stores a file in blob storage.
-    Args:
-        file: The file to store.
-        move_file: True to move the file from its old location to the new location in bsr. False to copy the file but
-        leave it in the old location as well.
-
-    Returns: A tuple of (BlobStorage entry, file_hash, year, month, day)
-
-    """
-    file_name = file_to_hashed_name(file)
-    current_date = datetime.utcnow()
-    date_path = (current_date.year, current_date.month, current_date.day)
-    bsr_path = os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None), *map(str, date_path)))
-    if not os.path.exists(bsr_path):
-        os.makedirs(bsr_path)
-
-    full_destination_path = os.path.join(bsr_path, file_name)
-    if move_file:
-        shutil.move(file, full_destination_path)
-    else:
-        shutil.copy(file, full_destination_path)
-
-    # Now enter database entries for the file
-    bs = BlobStorage(file_name=file_name)
-    bs.save()
-
-    return bs
+        return os.path.join(bsr_path, file_name)
 
 
-def read_bsr(year, month, day, file_hash):
-    """
-    Constructs the absolute path to a file in blob storage using it's identifying path components
-    Args:
-        year: as string, e.g. 2016
-        month: as string, e.g. 11 for November, 4 for April
-        day: as string, e.g. 5 for the fifth
-        file_hash: as a string
+    def store_bsr_data(data, extension=""):
+        """
+        Store data into blob storage.
+        Args:
+            data: The data as a writable bytes string
+            extension: The optional file extension
 
-    Returns: The absolute path to the file in the BSR
+        Returns: The BlobStorage entry in the database
 
-    """
-    return os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None), year, month, day, file_hash))
+        """
+        file_name = data_to_hashed_name(data, extension)
+        with open(_make_bsr_path(file_name), 'wb') as fh:
+            fh.write(data)
+
+        bs = BlobStorage(file_name=file_name)
+        bs.save()
+
+        return bs
+
+
+elif BLOB_TYPE == "azure":
+    def store_bsr_data(data, extension=""):
+        """
+        Store data into blob storage.
+        Args:
+            data: The data as a writable bytes string
+            extension: The optional file extension
+
+        Returns: The BlobStorage entry in the database
+
+        """
+        file_name = data_to_hashed_name(data, extension)
+        blob_settings.block_blob_service.create_blob_from_bytes("blobs", file_name, data,
+                                                                content_settings=ContentSettings(
+                                                                    content_type='audio/wav'))
+
+        bs = BlobStorage(file_name=file_name)
+        bs.save()
+
+        return bs
+
+elif BLOB_TYPE == "s3":
+    def store_bsr_data(data, extension="", file_prefix=""):
+            """
+            Store data into blob storage.
+            Args:
+                data: The data as a writable bytes string
+                extension: The optional file extension
+                file_prefix: A file prefix, such as the user id
+
+            Returns: The BlobStorage entry in the database
+
+            """
+            file_name = data_to_hashed_name(data, extension) + file_prefix
+            blob_settings.boto3_client.put_object(Key=file_name, Body=data, Bucket="lazylecturebot")
+
+            bs = BlobStorage(file_name=file_name)
+            bs.save()
+
+            return bs
+
+
+
+def data_to_hashed_name(data, extension):
+    return hashlib.sha256(data).hexdigest() + "." + extension
 
 
 def file_to_hashed_name(file):

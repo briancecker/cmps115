@@ -1,14 +1,11 @@
 import os
 from django.conf import settings
 from django.test import TestCase
-from django.utils.datetime_safe import datetime
-from main.models import BlobStorage
 from modules import file_utilities
 from modules.blob_storage import blob_storage
 
 
 class BlobStorageTest(TestCase):
-
     def setUp(self):
         self.BSR = getattr(settings, "BLOB_STORAGE_ROOT", None)
         # Create a test file we can move and copy
@@ -34,27 +31,8 @@ class BlobStorageTest(TestCase):
         os.remove(self.test_read_file)
         os.removedirs(self.test_path)
 
-    def test_no_move_store(self):
-        blob_storage.store_bsr(self.test_file, move_file=False)
-        current_date = datetime.utcnow()
-        dir_path = os.path.join(self.BSR, str(current_date.year), str(current_date.month), str(current_date.day))
-        hashed_filename = blob_storage.file_to_hashed_name(self.test_file)
-        full_path = os.path.join(dir_path, hashed_filename)
-        self.assertTrue(os.path.exists(dir_path))
-        self.assertTrue(os.path.exists(full_path))
-        self.assertTrue(os.path.exists(self.test_file))
-
-        # Check that it's in the database
-        blobs = BlobStorage.objects.all()
-        self.assertEqual(len(blobs), 1)
-
-        # Remove file from BSR
-        os.remove(full_path)
-
-    def test_read(self):
-        file_path = blob_storage.read_bsr("year", "month", "day", "test_file")
-        self.assertTrue(os.path.exists(file_path))
-        with open(file_path, 'rb') as fh:
-            contents = fh.read()
-
-        self.assertEqual(self.test_read_contents, contents)
+    def test_store(self):
+        test_bytes = b"This is a test string!"
+        bs = blob_storage.store_bsr_data(test_bytes)
+        retrieved_bytes = bs.get_blob()
+        self.assertEqual(test_bytes, retrieved_bytes)

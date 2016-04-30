@@ -1,0 +1,3 @@
+This directory is NOT for developers to place static files in. Use static for that.
+
+This directory provides a place for django to automatically collect and group together static files during deployment.
