@@ -1,3 +1,5 @@
+from mimetypes import MimeTypes # Useful for guessing the filetype
+
 from django import forms
 from django.contrib.auth.models import User
 
@@ -7,7 +9,14 @@ from django.contrib.auth.models import User
 
 """""""""""""""""""""
 class VideoUploadForm(forms.Form):
-	video = forms.FileField()
+	
+	video_file = forms.FileField(
+		label='Upload Video',
+		help_text='max is 1GB'
+		)
 	title = forms.CharField(max_length = 50)
-	description = forms.CharField()
-	public_access = forms.BooleanField(widget=forms.RadioSelect())
+	description = forms.CharField(widget=forms.Textarea)
+	public_access = forms.ChoiceField( 
+										widget=forms.RadioSelect, 
+										choices=( ('1', 'Public'),
+												  ('2', 'Private')))

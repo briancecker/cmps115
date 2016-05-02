@@ -16,3 +16,6 @@ venv/
 
 lazy_lecture_bot/tmp/*
 lazy_lecture_bot/resources/credentials/*
+lazy_lecture_bot/media/*
+lazy_lecture_bot/main/migrations/*
+lazy_lecture_bot/videoapp/migrations/*

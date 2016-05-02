@@ -11,22 +11,25 @@
 			<div><h1>Upload A Video</h1></div>
 			<!-- FILE UPLOAD GROUP-->
 			<div class="form-group">
-				<input type="file" name="uploadedFile"/>
+				<!--input type="file" accept="video/*" name="uploadedFile"/-->
+				{{ form.video_file }}
 			</div>
 			<!-- TITLE GROUP-->
 			<div class="form-group">
 				<label>Title</label>
-				<input type="text" class="form-control" name="title" placeholder="Title"></input>
+				<!--input type="text" class="form-control" name="title" placeholder="Title"></input-->
+				{{ form.title }}
 			</div>
 			<!-- DESCRIPTION GROUP-->
 			<div class="form-group">
 				<label>Description</label>
-				<textarea rows="5" class="form-control" placeholder="Write something about the video..." name="description"></textarea>
+				<!--textarea rows="5" class="form-control" placeholder="Write something about the video..." name="description"></textarea-->
+				{{ form.description }}
 			</div>
 			<!-- PRIVACY GROUP-->
 			<div class="form-group">
 				<label>Privacy Settings</label>
-				<div class="radio">
+				<!--div class="radio">
 					<label>
 						<input type="radio" name="publicAccess" value="True" checked/>
 						Public
@@ -37,7 +40,8 @@
 						<input type="radio" name="publicAccess" value="False" />
 						Private
 					</label>
-				</div>
+				</div-->
+				{{form.public_access}}
 			</div>
 			<!--SUBMIT BUTTON-->
 			<button type="submit" class="btn btn-primary btn-lg" style="background-color: rgb(46, 204, 113); border-radius: 0px; border-style: none;"><b>UPLOAD</b></button>
