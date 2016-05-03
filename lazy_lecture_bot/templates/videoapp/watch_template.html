@@ -5,16 +5,15 @@
 <div class="container">
 	<div class="row">
 		<div class="col-md-7">
-			<video width=640 height=360 controls poster="https://placeholdit.imgix.net/~text?txtsize=69&txt=740%C3%97416&w=740&h=416">
-				<source src="testmovie.mp4" type="video/mp4">
-				<source src="testmovie.ogg" type="video/ogg">
+			<video width=640 height=360 controls>
+				<source src="{{video_url}}" type="video/mp4">
+				<source src="{{video_url}}" type="video/ogg">
 				Your browser does not support this video tag
 			</video>
-			<div><h1>TITLE</h1></div>
-			<div>poster_name</div>
-			<div>posted on 00/00/00</div>
-			<div style="overflow: auto; height: 300px;">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-Nisi commodo esse nulla ex occaecat ut labore sunt enim nostrud Lorem veniam, adipisicing elit, sit undefined aliquip anim occaecat adipisicing officia irure pariatur. dolor Ut consectetur do dolor voluptate laborum. mollit et voluptate fugiat voluptate veniam, sit exercitation veniam, quis in eiusmod in irure nisi voluptate proident, anim Ut esse aliquip sint ea et sint consectetur do</div>
+			<div><h1>{{post.title}}</h1></div>
+			<div>{{post.author}}</div>
+			<div>posted on {{post.publish_date}}</div>
+			<div style="overflow: auto; height: 300px;">{{post.description}}</div>
 		</div>
 		<div class="col-md-5">
 			<div><h3>Transcript:</h3></div>

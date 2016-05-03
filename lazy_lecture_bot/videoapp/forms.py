@@ -1,4 +1,5 @@
 from mimetypes import MimeTypes # Useful for guessing the filetype
+import uuid
 
 from django import forms
 from django.contrib.auth.models import User
@@ -16,7 +17,8 @@ class VideoUploadForm(forms.Form):
 		)
 	title = forms.CharField(max_length = 50)
 	description = forms.CharField(widget=forms.Textarea)
-	public_access = forms.ChoiceField( 
-										widget=forms.RadioSelect, 
-										choices=( ('1', 'Public'),
-												  ('2', 'Private')))
+	public_access = forms.TypedChoiceField(
+						widget=forms.RadioSelect, 
+						choices=((True, 'Public'),
+								 (False, 'Private')),
+					)

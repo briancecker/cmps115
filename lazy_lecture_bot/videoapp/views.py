@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from user.forms import *
 from django.views.decorators.csrf import csrf_protect
+from django.conf import settings
 
 from modules.voice_to_text.watson.watson_video_pipeline import WatsonVideoPipeline
 
@@ -16,8 +17,13 @@ from .models import VideoPost
 	WATCH VIDEOS
 
 """""""""""""""""""""
-def watch_video_view(request):
-	context = {}
+def watch_video_view(request, video_id):
+	post = VideoPost.objects.get(pk=video_id)
+	video_url = post.upload.url
+	context = {
+		"post" : post,
+		"video_url" : video_url,
+	}
 	return render(request, "videoapp/watch_template.html", context)
 
 """""""""""""""""""""

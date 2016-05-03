@@ -8,8 +8,8 @@ def get_ghost_user():
     return get_user_model().objects.get_or_create(username='deleted')[0]
 
 def user_directory_path(instance, filename):
-    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
-    return 'user_{0}/{1}'.format(instance.author.id, filename)
+    # file will be uploaded to MEDIA_ROOT/user_<id>/videos/<filename>
+    return 'user_{0}/videos/{1}'.format(instance.author.id, filename)
 
 # Create your models here.
 class VideoPost(models.Model):
