@@ -14,8 +14,7 @@ def user_directory_path(instance, filename):
 # Create your models here.
 class VideoPost(models.Model):
 	"""Model that aggregates the metadata of the video post"""
-	#video = models.ForeignKey('main.Videos')
-	upload = models.FileField(upload_to=user_directory_path)
+	upload = models.ForeignKey('main.Videos')
 	title = models.CharField(max_length = 50)
 	description = models.CharField(max_length = 455)
 	public_access = models.BooleanField()
