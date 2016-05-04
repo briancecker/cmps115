@@ -2,7 +2,7 @@ from .base import *
 
 DEBUG = True
 
-BLOB_STORAGE_TYPE = "local"
+BLOB_STORAGE_TYPE = "s3"
 
 # Celery configuration
 INSTALLED_APPS.append("kombu.transport.django")

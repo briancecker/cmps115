@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.conf import settings
 
 from user import views as user_views
 from videoapp import views as video_views
@@ -31,3 +32,7 @@ urlpatterns = [
     url(r'^watch/', include('videoapp.urls'), name="video_watch"),
     url(r'^upload/', video_views.upload_view, name="upload")
 ]
+
+if settings.DEBUG:
+  urlpatterns.append(url(r'^media/(?P<path>.*)$', 
+    'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}))

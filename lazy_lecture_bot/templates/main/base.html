@@ -34,13 +34,14 @@
 				<div class="collapse navbar-collapse">
 					<ul class="nav navbar-nav navbar-right">
 						{% if not request.user.is_authenticated and not "/login" in request.get_full_path %}
-						<!--NAVBAR DROPDOWN-->
+						<!--SIGN IN DROPDOWN-->
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Sign In <span class="caret"></span></a>
 							<ul class="dropdown-menu">
 								<li>
 									<div class="container-fluid">
-										<form class="navbar-form" method="POST" action="{% url 'auth_login' %}">{% csrf_token %}
+										<form class="navbar-form" method="POST" action="{% url 'auth_login' %}?redirect={{request.path}}">
+										{% csrf_token %}
 											<div class="form-group" style="margin-top:15px">
 												<label>Username</label>
 												<input type="text" class="form-control" name="username" placeholder="Username" />
@@ -62,7 +63,7 @@
 							<ul class="dropdown-menu">
 								<li><a href="{% url 'profile' user.username %}">My Profile</a></li>
 								<li><a href="/">Settings</a></li>
-								<li><a href="{% url 'logoff' %}">Log Off</a></li>
+								<li><a href="{% url 'logoff' %}?redirect={{request.path}}">Log Off</a></li>
 							</ul>
 						</li>
 						<li><a href="{% url 'upload' %}" class="btn" style="background-color: rgb(46, 204, 113); color:white; border-radius: 0px"><b>UPLOAD</b></a></li>

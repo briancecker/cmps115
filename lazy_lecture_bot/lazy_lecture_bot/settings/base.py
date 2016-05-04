@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "main.apps.MainConfig",
+    'videoapp'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -135,3 +136,7 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 # Define space to store blob files
 # see the wiki for more information: https://github.com/briancecker/cmps115/wiki/Blob-and-Video-Storage/
 BLOB_STORAGE_ROOT = os.path.join(file_utilities.TMP_DIR, "BLOB_STORAGE_ROOT")
+
+# These are where we'll store uploaded media for now
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'

@@ -12,17 +12,25 @@
 		{% endif %}
 	</ul>
 	<div class="row" style="margin-top: 30px;">
-		{% for i in n %}
+		{% if not vp %}
+			WHOOPS THE DATABASE IS EMPTY!
+		{% endif %}
+		
+	    {% for v in vp %}
 		<!-- VIDEO PREVIEW -->
 		<div class="col-sm-3"> 
 			<div class="thumbnail" style="border-style: none;">
-	      		<a href="{% url 'watch' %}"><img src='https://placeholdit.imgix.net/~text?txtsize=23&txt=250%C3%97140&w=254&h=140' alt="..." style="height: 140px; background-color: rgb(189, 195, 199)" /></a>
+				<!-- THUMBNAIL IMAGE -->
+	      		<a href="{% url 'watch_video' v.id %}"><img src='https://placeholdit.imgix.net/~text?txtsize=23&txt=250%C3%97140&w=254&h=140' alt="..." style="height: 140px; background-color: rgb(189, 195, 199)" /></a>
+	      		<!-- OTHER INFORMATION -->
 	      		<div class="caption" style="padding: 10px 0px 0px 0px;">
-	        		<b><a href="{% url 'watch' %}">Video Title {{i}}</a></b>
-	        		<div><a href="..." style="color:black">Testname</a></div>
+	      			<!-- VIDEO TITLE -->
+	        		<b><a href="{% url 'watch_video' v.id %}">{{ v.title }}</a></b>
+	        		<!-- VIDEO AUTHOR -->
+	        		<div><a href="{% url 'profile' v.author %}" style="color:black">{{ v.author }}</a></div>
 	        		<p>
 	        		07:00<br>
-	        		Posted on: 00/00/00</p>
+	        		Posted on: {{ v.publish_date }}</p>
 	      		</div>
 	      	</div>
 	    </div><!-- END OF VIDEO PREVIEW -->
