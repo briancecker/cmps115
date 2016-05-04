@@ -20,7 +20,7 @@ from main.models import Segments, Transcripts, Utterances
 """""""""""""""""""""
 def watch_video_view(request, video_id):
 	post = VideoPost.objects.get(pk=video_id)
-	video_url = post
+	video_url = post.upload.video_blob.get_url()
 	context = {
 		"post" : post,
 		"video_url" : video_url,
