@@ -75,7 +75,8 @@ elif BLOB_TYPE == "s3":
 
             """
             file_name = data_to_hashed_name(data, extension) + file_prefix
-            blob_settings.boto3_client.put_object(Key=file_name, Body=data, Bucket="lazylecturebot")
+            blob_settings.boto3_client.put_object(Key=file_name, Body=data, Bucket="lazylecturebot",
+                                                  GrantRead="everyone")
 
             bs = BlobStorage(file_name=file_name)
             bs.save()
