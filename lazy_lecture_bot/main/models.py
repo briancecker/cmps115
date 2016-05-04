@@ -33,6 +33,25 @@ class BlobStorage(models.Model):
         elif blob_type == "s3":
             return blob_settings.boto3_client.get_object(Key=self.file_name, Bucket="lazylecturebot")["Body"].read()
 
+    def get_url(self):
+        """
+        Get the url to the blob.
+        Returns: if blob storage is "local", return a file system path, otherwise return a ur
+
+        """
+        blob_type = getattr(settings, "BLOB_STORAGE_TYPE")
+        if blob_type == "local":
+            import os
+            date = self.date
+            return os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None), str(date.year),
+                                                str(date.month), str(date.day), self.file_name))
+        elif blob_type == "azure":
+            raise NotImplementedError("get_url for azure is not setup")
+        elif blob_type == "s3":
+            location = blob_settings.boto3_client.get_bucket_location(Bucket="lazylecturebot")["LocationConstraint"]
+            return "https://s3-{bucket_location}.amazonaws.com/lazylecturebot/{file_name}".format(
+                bucket_location=location, file_name=self.file_name)
+
 
 class Videos(models.Model):
     audio_blob = models.ForeignKey("BlobStorage", related_name="audio_path")
