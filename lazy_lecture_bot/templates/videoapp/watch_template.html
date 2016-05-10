@@ -1,8 +1,9 @@
 {% extends "main/base.html" %}
-{% block title %}Video Title | {{block.super}}{% endblock title %}
+{% block title %}{{ post.title }} | {{ block.super }}{% endblock title %}
 {% block content %}
 {{block.super}}
 <div class="container">
+	<script src="http://popcornjs.org/code/dist/popcorn-complete.js"></script>
 	<div class="row">
 		<div class="col-md-7">
 			<video width=640 height=360 controls>
@@ -26,7 +27,7 @@
 							<dd>{{ utterance.text }}</dd>
 						</dt>
 					{% endfor %}
-				{%endfor%}
+				{%endfor%}</dl>
 			</div>
 		</div>
 	</div>

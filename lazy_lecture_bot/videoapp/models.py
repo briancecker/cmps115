@@ -20,4 +20,5 @@ class VideoPost(models.Model):
 	public_access = models.BooleanField()
 	publish_date = models.DateTimeField(default=timezone.now)
 	author = models.ForeignKey( settings.AUTH_USER_MODEL,
-								on_delete=models.SET(get_ghost_user))
+								on_delete=models.SET(get_ghost_user),)
+	upload_duration = models.CharField(max_length=6)

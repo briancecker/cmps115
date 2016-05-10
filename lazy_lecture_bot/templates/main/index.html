@@ -29,7 +29,7 @@
 	        		<!-- VIDEO AUTHOR -->
 	        		<div><a href="{% url 'profile' v.author %}" style="color:black">{{ v.author }}</a></div>
 	        		<p>
-	        		07:00<br>
+	        		{{ v.upload_duration }}<br>
 	        		Posted on: {{ v.publish_date }}</p>
 	      		</div>
 	      	</div>

@@ -30,7 +30,8 @@ urlpatterns = [
     url(r'^login/$', user_views.login_user, name="login"),
     url(r'^login/auth_login/$', user_views.auth_login, name="auth_login"),
     url(r'^watch/', include('videoapp.urls'), name="video_watch"),
-    url(r'^upload/', video_views.upload_view, name="upload")
+    url(r'^upload/', video_views.upload_view, name="upload"),
+    url(r'^s3direct/', include('s3direct.urls')),
 ]
 
 if settings.DEBUG:

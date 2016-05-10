@@ -19,3 +19,5 @@ lazy_lecture_bot/resources/credentials/*
 lazy_lecture_bot/media/*
 lazy_lecture_bot/main/migrations/*
 lazy_lecture_bot/videoapp/migrations/*
+
+lazy_lecture_bot/static_collected/*

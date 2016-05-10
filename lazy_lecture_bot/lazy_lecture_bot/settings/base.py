@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "main.apps.MainConfig",
-    'videoapp'
+    'videoapp',
+    's3direct'
 ]
 
 MIDDLEWARE_CLASSES = [
