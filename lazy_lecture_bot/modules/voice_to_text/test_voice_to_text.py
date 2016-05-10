@@ -7,8 +7,12 @@ import shutil
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from django.conf import settings
+from gunicorn.http.wsgi import create
 from main.models import Videos, Segments, Transcripts, BlobStorage, Utterances, Tokens
 from modules import file_utilities
+from modules.blob_storage import blob_settings
+from modules.blob_storage.blob_storage import store_bsr_data, create_bsr_from_s3
+from modules.voice_to_text import async_tasks
 from modules.voice_to_text.audio_segmenter import AudioSegmenter
 from modules.voice_to_text.audio_transcriber import AudioTranscriber
 from modules.voice_to_text.max_size_audio_segmenter import MaxSizeAudioSegmenter
@@ -83,26 +87,15 @@ class TestVideoPipeline(TestCase):
         self.segmenter = RandomSegmenter(self.n_segments)
         self.transcriber = RandomTranscriber(n_utterances=5, n_tokens=15)
 
-        today = timezone.now()
-        self.blob_dir = os.path.join(getattr(settings, "BLOB_STORAGE_ROOT"),
-                                     str(today.year), str(today.month), str(today.day))
-        if os.path.exists(self.blob_dir):
-            self.blob_files = os.listdir(self.blob_dir)
-        else:
-            self.blob_files = None
+        # Send a test file to s3
+        self.test_s3 = "test_s3"
+        blob_settings.boto3_client.put_object(Key=self.test_s3, Body=self.test_video,
+                                              Bucket=blob_settings.bucket_name, ACL="public-read")
+        self.test_blob = create_bsr_from_s3(self.test_s3)
 
     def tearDown(self):
         self.segmenter.cleanup()
-
-        # Cleanup extra blob storage files
-        if self.blob_files is None:
-            shutil.rmtree(self.blob_dir)
-        else:
-            for f in os.listdir(self.blob_dir):
-                if f not in self.blob_files:
-                    file_path = os.path.join(self.blob_dir, f)
-                    if os.path.exists(file_path):
-                        os.remove(file_path)
+        blob_settings.boto3_client.delete_object(Key=self.test_s3, Bucket=blob_settings.bucket_name)
 
     @override_settings(CELERY_ALWAYS_EAGER=True,
                        CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
@@ -112,7 +105,7 @@ class TestVideoPipeline(TestCase):
 
         vp.audio_segmenter = self.segmenter
         vp.audio_transcriber = self.transcriber
-        video = vp.process_video(self.test_video)
+        video = vp.process_video(self.test_blob)
         self.assertTrue(video is not None)
 
         # Might take a second for the Celery task to finish
@@ -135,12 +128,9 @@ class TestVideoPipeline(TestCase):
         self.assertEqual(Tokens.objects.count(),
                          self.n_segments * self.transcriber.n_utterances * self.transcriber.n_tokens)
 
-    @override_settings(CELERY_ALWAYS_EAGER=True,
-                       CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-                       BROKER_BACKEND='memory')
     def watson_processing(self):
         vp = WatsonVideoPipeline()
-        video = vp.process_video(self.test_video)
+        video = vp.process_video(self.test_blob)
         self.assertTrue(video is not None)
 
         # It might take quite some time for the Celery task to finish. This depends on internet connection.
@@ -153,6 +143,24 @@ class TestVideoPipeline(TestCase):
         # Should definitely be finished by now
         self.assertTrue(video.finished_processing)
 
+        self.assertEqual(Videos.objects.count(), 1)
+        self.assertEqual(Segments.objects.count(), 1)
+        self.assertEqual(Transcripts.objects.count(), 1)
+        self.assertGreater(Utterances.objects.count(), 1)
+        self.assertGreater(Tokens.objects.count(), 1)
+
+        # Print some debug text
+        print(Transcripts.objects.all()[0].text)
+        print(Utterances.objects.all()[0].text)
+        print(Tokens.objects.all()[0].text)
+
+    @override_settings(CELERY_ALWAYS_EAGER=True,
+                       CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                       BROKER_BACKEND='memory')
+    def test_async_task(self):
+        async_tasks.queue_vp_request(self.test_s3)
+
+        # Should definitely be finished by now
         self.assertEqual(Videos.objects.count(), 1)
         self.assertEqual(Segments.objects.count(), 1)
         self.assertEqual(Transcripts.objects.count(), 1)
