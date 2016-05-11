@@ -55,7 +55,7 @@ def queue_vp_request(request, pipeline_name="watson"):
     else:
         pipeline_type = pipeline_type[0]
     video = Videos(audio_blob=audio_blob, video_blob=video_blob, user_id=1, finished_processing=False,
-                   pipeline_type=pipeline_type)
+                   pipeline_type=pipeline_type, processing_status="")
     video.save()
 
     # Do the rest of the processing and transcribing asynchronously

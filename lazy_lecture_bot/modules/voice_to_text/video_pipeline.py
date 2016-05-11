@@ -116,18 +116,25 @@ class VideoPipeline:
 
         """
         logger.info("Stripping audio and storing it")
+        video.processing_status = "Stripping Audio"
+        video.save()
         video_bytes = video.video_blob.get_blob()
         audio = self._strip_audio(video_bytes)
         self._store_audio(video, audio)
 
         logger.info("segmenting")
+        video.processing_status = "Segmenting Audio"
+        video.save()
         audio_segments = self.audio_segmenter.segment(video.audio_blob.get_blob())
         db_segments = store_segments(video, audio_segments)
 
         logger.info("transcribing {0} segments".format(len(db_segments)))
+        video.processing_status = "Transcribing Audio"
+        video.save()
         transcripts = [self.audio_transcriber.transcribe(segment.audio_blob.get_blob()) for segment in db_segments]
         store_transcripts(video, db_segments, transcripts)
 
+        video.processing_status = ""
         video.finished_processing = True
         video.save()
 
