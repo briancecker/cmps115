@@ -45,19 +45,24 @@ def store_transcripts(db_video, db_segments, transcripts):
     Returns: None
 
     """
+    segment_offset = 0.0
     for db_segment, transcript in zip(db_segments, transcripts):
         db_trans = Transcripts(video_id=db_video, segment_id=db_segment, text=transcript["transcript"])
         db_trans.save()
         for utterance_index, utterance in enumerate(transcript["utterances"]):
             db_utterance = Utterances(transcript_id=db_trans, utterance_index=utterance_index,
-                                      start_time=utterance["start"], end_time=utterance["end"],
+                                      start_time=segment_offset + utterance["start"],
+                                      end_time=segment_offset + utterance["end"],
                                       text=utterance["transcript"])
             db_utterance.save()
             for token_index, token in enumerate(utterance["tokens"]):
-                db_token = Tokens(utterance_id=db_utterance, token_index=token_index, start_time=token["start"],
-                                  end_time=token["end"], text=token["token"])
+                db_token = Tokens(utterance_id=db_utterance, token_index=token_index,
+                                  start_time=segment_offset + token["start"],
+                                  end_time=segment_offset + token["end"],
+                                  text=token["token"])
                 db_token.save()
 
+        segment_offset += db_segment.segment_duration
 
 class VideoPipeline:
     """
