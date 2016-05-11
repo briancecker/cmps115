@@ -2,7 +2,7 @@ import time
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from modules.voice_to_text import async_tasks
@@ -45,7 +45,6 @@ Helper function that retrieves a list of transcripts when passed a VideoObject.
 def get_transcript(video_object):
     segment_query = Segments.objects.filter(id=video_object.id)
     results = []
-    segment_begin_offset = 0.0
     for segment in segment_query:
         transcripts = Transcripts.objects.filter(video_id=video_object.id, segment_id=segment.id)
         if len(transcripts) != 0:
@@ -54,7 +53,6 @@ def get_transcript(video_object):
             results.append({
                 "transcript": transcript,
                 "utterances": utterances})
-            segment_begin_offset += segment.segment_duration
     return results
 
 
@@ -80,6 +78,7 @@ def upload_view(request):
                                 author=request.user,
                                 upload_duration="")
             newpost.save()
+            return HttpResponseRedirect('/')
 
     context = {
         'form': form,
@@ -102,10 +101,3 @@ def get_video_duration(video_object):
     seconds = int(duration % 60)
     converted_time = s_time = str(minutes) + ":" + str(seconds)
     return converted_time
-
-
-@require_POST
-def queue_video(request):
-    async_tasks.queue_vp_request(request)
-
-    return HttpResponse()
