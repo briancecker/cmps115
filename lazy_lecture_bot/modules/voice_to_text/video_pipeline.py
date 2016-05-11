@@ -64,6 +64,7 @@ def store_transcripts(db_video, db_segments, transcripts):
 
         segment_offset += db_segment.segment_duration
 
+
 class VideoPipeline:
     """
     Base class for video pipelines.
@@ -91,6 +92,9 @@ class VideoPipeline:
         audio, return_code = video_processing.strip_audio(video)
         if return_code != 0:
             raise VideoPipelineException("ffmpeg returned non-zero error code. Returned code: {0}".format(return_code))
+
+        logger.info("ffmpeg in strip_audio returned return_code: {0}, audio_result is length: {1}".format(return_code,
+                                                                                                          len(audio)))
 
         return audio
 
@@ -125,7 +129,9 @@ class VideoPipeline:
         video.processing_status = "Stripping Audio"
         video.save()
         video_bytes = video.video_blob.get_blob()
+        logger.info("Video bytes length: {0}".format(len(video_bytes)))
         audio = self._strip_audio(video_bytes)
+        logger.info("Audio is of length {0}".format(len(audio)))
         self._store_audio(video, audio)
 
         logger.info("Getting video and audio length")
