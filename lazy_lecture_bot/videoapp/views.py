@@ -47,12 +47,14 @@ def get_transcript(video_object):
     results = []
     segment_begin_offset = 0.0
     for segment in segment_query:
-        transcript = Transcripts.objects.filter(video_id=video_object.id, segment_id=segment.id)[0]
-        utterances = Utterances.objects.filter(transcript_id=transcript.id)
-        results.append({
-            "transcript": transcript,
-            "utterances": utterances})
-        segment_begin_offset += segment.segment_duration
+        transcripts = Transcripts.objects.filter(video_id=video_object.id, segment_id=segment.id)
+        if len(transcripts) != 0:
+            transcript = transcripts[0]
+            utterances = Utterances.objects.filter(transcript_id=transcript.id)
+            results.append({
+                "transcript": transcript,
+                "utterances": utterances})
+            segment_begin_offset += segment.segment_duration
     return results
 
 
