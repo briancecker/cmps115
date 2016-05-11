@@ -1,58 +1,58 @@
+import botocore
 import hashlib
-import os
-import shutil
-# Buffer size for reading files chunk by chunk
-from django.utils.datetime_safe import datetime
-from django.conf import settings
 from main.models import BlobStorage
+from modules.blob_storage import blob_settings
 
-BUF_SIZE = 65536
+# Buffer size for hashing file to name
+BUF_SIZE = 64000
 
 
-def store_bsr(file, move_file=True):
+def store_bsr_data(data, extension="", file_prefix=""):
     """
-    Stores a file in blob storage.
+    Store data into blob storage.
     Args:
-        file: The file to store.
-        move_file: True to move the file from its old location to the new location in bsr. False to copy the file but
-        leave it in the old location as well.
+        data: The data as a writable bytes string
+        extension: The optional file extension
+        file_prefix: A file prefix, such as the user id
 
-    Returns: A tuple of (BlobStorage entry, file_hash, year, month, day)
+    Returns: The BlobStorage entry in the database
 
     """
-    file_name = file_to_hashed_name(file)
-    current_date = datetime.utcnow()
-    date_path = (current_date.year, current_date.month, current_date.day)
-    bsr_path = os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None), *map(str, date_path)))
-    if not os.path.exists(bsr_path):
-        os.makedirs(bsr_path)
+    file_name = "blob/" + data_to_hashed_name(data, extension) + file_prefix
+    blob_settings.boto3_client.put_object(Key=file_name, Body=data, Bucket=blob_settings.bucket_name, ACL="public-read")
 
-    full_destination_path = os.path.join(bsr_path, file_name)
-    if move_file:
-        shutil.move(file, full_destination_path)
-    else:
-        shutil.copy(file, full_destination_path)
-
-    # Now enter database entries for the file
     bs = BlobStorage(file_name=file_name)
     bs.save()
 
     return bs
 
 
-def read_bsr(year, month, day, file_hash):
+def create_bsr_from_s3(file_name):
     """
-    Constructs the absolute path to a file in blob storage using it's identifying path components
+    Create a BlobStorage record from a file already on s3 (such as from a direct s3 upload).
     Args:
-        year: as string, e.g. 2016
-        month: as string, e.g. 11 for November, 4 for April
-        day: as string, e.g. 5 for the fifth
-        file_hash: as a string
+        file_name: The name with path of a file on s3
 
-    Returns: The absolute path to the file in the BSR
+    Returns: The BlobStorage record in the database
 
     """
-    return os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None), year, month, day, file_hash))
+    try:
+        blob_settings.boto3_client.get_object(Key=file_name, Bucket=blob_settings.bucket_name)
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            # Object doesn't exist
+            raise FileNotFoundError("{0} does not exist in s3".format(file_name))
+        else:
+            raise e
+
+    bs = BlobStorage(file_name=file_name)
+    bs.save()
+
+    return bs
+
+
+def data_to_hashed_name(data, extension):
+    return hashlib.sha256(data).hexdigest() + "." + extension
 
 
 def file_to_hashed_name(file):

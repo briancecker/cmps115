@@ -5,36 +5,49 @@ Definition of models.
 from django.db import models
 # Create your models here.
 from django.utils import timezone
-from lazy_lecture_bot import settings
-from lazy_lecture_bot.settings import BLOB_STORAGE_ROOT
+from modules.blob_storage import blob_settings
 
 
 class BlobStorage(models.Model):
     date = models.DateTimeField(default=timezone.now)
     # Restrict all possible file names to only those files in the BLOB_STORAGE_ROOT
-    file_name = models.FilePathField(BLOB_STORAGE_ROOT, recursive=True)
+    file_name = models.URLField()
 
-    def get_abs_path(self):
+    def get_blob(self):
         """
-        Get the absolute path to the file
+        Get the actual blob object
 
-        Returns: Absoulte path
+        Returns: Get the blob as bytes
 
         """
-        import os
-        date = self.date
-        return os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None),
-                                            str(date.year), str(date.month), str(date.day), self.file_name))
+        return blob_settings.boto3_client.get_object(
+            Key=self.file_name, Bucket=blob_settings.bucket_name)["Body"].read()
 
+    def get_url(self):
+        """
+        Get the url to the blob.
+        Returns: if blob storage is "local", return a file system path, otherwise return a ur
+
+        """
+        location = blob_settings.boto3_client.get_bucket_location(Bucket="lazylecturebot")["LocationConstraint"]
+        return "https://s3-{bucket_location}.amazonaws.com/lazylecturebot/{file_name}".format(
+            bucket_location=location, file_name=self.file_name)
+
+
+class PipelineTypes(models.Model):
+    name = models.CharField(max_length=20)
 
 
 class Videos(models.Model):
-    title = models.CharField(max_length = 100)
+    title = models.CharField(max_length=100)
     audio_blob = models.ForeignKey("BlobStorage", related_name="audio_path")
     video_blob = models.ForeignKey("BlobStorage", related_name="video_path")
     user_id = models.IntegerField()
     # user_id = models.ForeignKey()  # this still needs a path to link to blob_storage user_ID
     finished_processing = models.BooleanField()
+    processing_status = models.CharField(max_length=20)
+    pipeline_type = models.ForeignKey("PipelineTypes")
+    video_duration = models.FloatField(default=-1.0)
 
     def __unicode__(self):
         return self.video_id
@@ -86,3 +99,4 @@ class Annotation(models.Model):
 
     def __unicode__(self):
         return self.word_number
+

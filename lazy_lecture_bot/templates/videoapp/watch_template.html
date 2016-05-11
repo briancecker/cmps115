@@ -1,0 +1,36 @@
+{% extends "main/base.html" %}
+{% block title %}{{ post.title }} | {{ block.super }}{% endblock title %}
+{% block content %}
+{{block.super}}
+<div class="container">
+	<script src="http://popcornjs.org/code/dist/popcorn-complete.js"></script>
+	<div class="row">
+		<div class="col-md-7">
+			<video width=640 height=360 controls>
+				<source src="{{video_url}}" type="video/mp4">
+				<source src="{{video_url}}" type="video/ogg">
+				Your browser does not support this video tag
+			</video>
+			<div><h1>{{ post.title }}</h1></div>
+			<div><a href="{% url 'profile' post.author %}">{{ post.author }}</a></div>
+			<div>posted on {{ post.publish_date }}</div>
+			<div style="overflow: auto; height: 300px;">{{ post.description }}</div>
+		</div>
+
+		<div class="col-md-5">
+			<div><h3>Transcript:</h3></div>
+			<div style="overflow: auto; height: 780px">
+			<dl class="dl-horizontal">
+				{% for transcript in transcript_data %}
+					{% for utterance in transcript.utterances %}
+						<dt><a>{{ utterance.start_time }} - {{ utterance.end_time }}</a>
+							<dd>{{ utterance.text }}</dd>
+						</dt>
+					{% endfor %}
+				{%endfor%}</dl>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock content %}

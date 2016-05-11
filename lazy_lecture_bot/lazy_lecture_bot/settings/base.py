@@ -13,10 +13,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-from modules import file_utilities
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".."))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -40,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "main.apps.MainConfig",
+    'videoapp',
+    's3direct'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -58,7 +57,7 @@ ROOT_URLCONF = 'lazy_lecture_bot.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR,'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -122,9 +121,18 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_collected')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, "s3direct", "static")
+]
 
-# Define space to store blob files
-# see the wiki for more information: https://github.com/briancecker/cmps115/wiki/Blob-and-Video-Storage/
-BLOB_STORAGE_ROOT = os.path.join(file_utilities.TMP_DIR, "BLOB_STORAGE_ROOT")
-if not os.path.exists(BLOB_STORAGE_ROOT):
-    os.makedirs(BLOB_STORAGE_ROOT)
+# And one more static files thing... I'm honestly not quite sure I understand this one, but see this link:
+#   https://devcenter.heroku.com/articles/django-app-configuration#Whitenoise
+# Simplified static file serving.
+# https://warehouse.python.org/project/whitenoise/
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+
+# These are where we'll store uploaded media for now
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'

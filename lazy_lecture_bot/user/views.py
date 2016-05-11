@@ -15,7 +15,7 @@ def show_user(request, username="None"):
 	if username is not "None":
 		user_instance = get_object_or_404(User,  username=username)
 	else:
-		if request.user.is_active: # ----------------------------- FIX THIS
+		if request.user.is_active:
 			user_instance = request.user
 		else:
 			return redirect("login")
@@ -75,11 +75,13 @@ def login_user(request):
 	return render(request, "user/login.html", context)
 
 def auth_login(request): ## This is where the actual authentication is happening
-	form = LoginForm(request.POST)
-	if form.is_valid():
-		user = form.login(request)
-		login(request, user)
-		return redirect("/")
+	if request.method == "POST":
+		form = LoginForm(request.POST)
+		redirect_to = request.GET.get("redirect")
+		if form.is_valid():
+			user = form.login(request)
+			login(request, user)
+			return redirect(redirect_to)
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -111,7 +113,8 @@ def delete_user(request):
 """""""""""""""
 @login_required
 def logoff_user(request):
+	redirect_to = request.GET.get("redirect")
 	logout(request)
-	return redirect("/")
+	return redirect(redirect_to)
 
 

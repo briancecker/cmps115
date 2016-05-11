@@ -1,37 +1,34 @@
+import io
+import logging
 import subprocess
+import sys
 import wave
 
-import sys
+# STRIP_AUDIO_CMD = "ffmpeg -i - -y -ab 160k -ac 2 -ar 16000 -vn -"
+NUM_CHANNELS = 2
+SAMPLE_FORMAT = "s16"  # 16 bit depth
+SAMPLE_RATE = 16000
+STRIP_AUDIO_CMD = "ffmpeg -vcodec h264 -acodec aac -i - -y -ab 160k -ac {num_channels} -ar {sample_rate} " \
+                  "-vn -sample_fmt {sample_fmt} -f wav -".format(num_channels=NUM_CHANNELS, sample_rate=SAMPLE_RATE,
+                                                                 sample_fmt=SAMPLE_FORMAT)
 
-import os
-from modules import file_utilities
-
-STRIP_AUDIO_CMD = "ffmpeg -i {input_file} -y -ab 160k -ac 2 -ar 16000 -vn {output_file}"
+logger = logging.Logger("django")
 
 
 def strip_audio(video):
     """
-    Gets the audio from a video file.
+    Gets the audio from a video
 
     Args:
-        video: The path to the video to take audio from
+        video: The video as a file wrapper, BytesIO wrapper, etc.
 
-    Returns: The path to an audio file and the ffmpeg return code
+    Returns: The audio as bytes and the ffmpeg return code
 
     """
-    if not os.path.exists(video):
-        raise FileNotFoundError("video file {0} does not exist, refusing to pass it to ffmpeg".format(video))
-    # tmp file to hold audio output
-    audio = os.path.abspath(os.path.join(
-        file_utilities.TMP_DIR, "audio_{0}.wav".format(file_utilities.path_leaf(video))))
-    strip_cmd = STRIP_AUDIO_CMD.format(input_file=video, output_file=audio).split()
-    p = subprocess.Popen(strip_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    # wait until the stripping is done
-    return_code = p.wait()
-
-    # Close these to avoid a resource leak that unittests complain about
-    p.stdout.close()
-    p.stderr.close()
+    p = subprocess.Popen(STRIP_AUDIO_CMD.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    audio, err = p.communicate(input=video)
+    logger.warn(err.decode("utf-8"))
+    return_code = p.returncode
 
     return audio, return_code
 
@@ -46,12 +43,21 @@ def read_audio_frames(audio, n_frames):
     Yields: at most n_frames frames from the audio file as a string of bytes
 
     """
-    with wave.open(audio, 'rb') as wave_read:
-        total_frames = wave_read.getnframes()
-        read_frames = 0
-        while read_frames < total_frames:
-            yield wave_read.readframes(n_frames)
-            read_frames += n_frames
+    n_at_once = 10000000
+    with wave.open(io.BytesIO(audio), 'rb') as wave_read:
+        # total_frames = wave_read.getnframes()  # getnframes IS BUGGED
+        frame_size = wave_read.getnchannels() * wave_read.getsampwidth()
+        all_frames = b''
+        while True:
+            frames = wave_read.readframes(n_at_once)
+            all_frames += frames
+            if len(frames) < (n_at_once * frame_size):
+                break
+
+        current = 0
+        while (current * frame_size) < len(all_frames):
+            yield all_frames[current * frame_size:(current+n_frames) * frame_size]
+            current += n_frames
 
 
 def read_audio_segments_by_time(audio, time):
@@ -69,8 +75,15 @@ def read_audio_segments_by_time(audio, time):
     return read_audio_frames(audio, frames_per_segment)
 
 
+def get_audio_duration(audio):
+    params = get_audio_params(audio)
+    n_frames = sum(bytes_to_n_frames(frame_group, params["nchannels"], params["sampwidth"])
+                   for frame_group in read_audio_frames(audio, 5000))
+    return n_frames / params["framerate"]
+
+
 def get_audio_params(audio):
-    with wave.open(audio, "rb") as wave_read:
+    with wave.open(io.BytesIO(audio), "rb") as wave_read:
         params = wave_read.getparams()
         nchannels, sampwidth, framerate, nframes, comptype, compname = params
         return {"nchannels": nchannels,
@@ -80,6 +93,20 @@ def get_audio_params(audio):
                 "comptype": comptype,
                 "compname": compname
                 }
+
+
+def new_audio_buffer(from_buffer):
+    buffer = io.BytesIO()
+    wave_write = wave.open(buffer, 'wb')
+    with wave.open(io.BytesIO(from_buffer), 'rb') as wave_read:
+        # For some reason setparams(getparams()) does not work with a BytesIO()...
+        nchannels, sampwidth, framerate, nframes, comptype, compname = wave_read.getparams()
+        wave_write.setnchannels(nchannels)
+        wave_write.setsampwidth(sampwidth)
+        wave_write.setframerate(framerate)
+        wave_write.setcomptype(comptype, compname)
+
+    return wave_write, buffer
 
 
 def copy_audio_file_settings(audio_in, audio_out):

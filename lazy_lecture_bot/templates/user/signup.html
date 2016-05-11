@@ -15,12 +15,12 @@
 				<form method="POST" action=".">{% csrf_token %}
 					<div class="form-group">
 						<label for="{{form.email.id_for_label}}">Email</label>
-						{{form.email}}
+						{{ form.email }}
 						{{ form.email.errors }}
 					</div>
 					<div class="form-group">
 						<label for="{{form.username.id_for_label}}">Username</label>
-						{{form.username}}
+						{{ form.username }}
 						{{ form.username.errors }}
 					</div>
 					<div class="form-group">
@@ -30,8 +30,8 @@
 					</div>
 					<div class="form-group">
 						<label for="{{form.password_confirm.id_for_label}}">Confirm Password</label>
-						{{form.confirm_password}}
-						{{form.confirm_password.errors}}
+						{{ form.confirm_password }}
+						{{ form.confirm_password.errors }}
 					</div>
 					<input type="submit" value="Sign Up" class="btn btn-primary btn-block btn-lg"></input>
 				</form>
