@@ -84,17 +84,15 @@
 
     var concurrentUploads = 0
     var disableSubmit = function(status) {
-        var submitRow = document.querySelector('.submit-row')
-        if( ! submitRow) return
+        $(".submit-row").each(function() {
+            if (status === true) {
+                concurrentUploads++
+            } else {
+                concurrentUploads--
+            }
 
-        var buttons = submitRow.querySelectorAll('input[type=submit]')
-
-        if (status === true) concurrentUploads++
-        else concurrentUploads--
-
-        ;[].forEach.call(buttons, function(el){
-            el.disabled = (concurrentUploads !== 0)
-        })
+            $(this).find('button:submit').prop('disabled', concurrentUploads !== 0);
+        });
     }
 
     var upload = function(file, data, el) {
