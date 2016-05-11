@@ -75,6 +75,13 @@ def read_audio_segments_by_time(audio, time):
     return read_audio_frames(audio, frames_per_segment)
 
 
+def get_audio_duration(audio):
+    params = get_audio_params(audio)
+    n_frames = sum(bytes_to_n_frames(frame_group, params["nchannels"], params["sampwidth"])
+                   for frame_group in read_audio_frames(audio, 5000))
+    return n_frames / params["framerate"]
+
+
 def get_audio_params(audio):
     with wave.open(io.BytesIO(audio), "rb") as wave_read:
         params = wave_read.getparams()
