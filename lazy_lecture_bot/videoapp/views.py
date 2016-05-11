@@ -1,5 +1,4 @@
 import time
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -7,13 +6,12 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from modules.voice_to_text import async_tasks
+from modules.voice_to_text.async_tasks import queue_vp_request
 from user.forms import *
 from django.views.decorators.csrf import csrf_protect
 from django.conf import settings
 from django.core import serializers
-
 from modules.voice_to_text.watson.watson_video_pipeline import WatsonVideoPipeline
-
 from .forms import VideoUploadForm
 from .models import VideoPost
 from main.models import Segments, Transcripts, Utterances
@@ -23,22 +21,27 @@ from main.models import Segments, Transcripts, Utterances
     WATCH VIDEOS
 
 """""""""""""""""""""
+
+
 def watch_video_view(request, video_id):
     post = VideoPost.objects.get(pk=video_id)
-    #data = serializers.serialize("json", Utterances.objects.all())
-    #print(data)
+    # data = serializers.serialize("json", Utterances.objects.all())
+    # print(data)
     video_url = post.upload.video_blob.get_url()
     context = {
-        "time" : time,
-        "post" : post,
-        "video_url" : video_url,
-        "transcript_data" : get_transcript(post.upload)
+        "time": time,
+        "post": post,
+        "video_url": video_url,
+        "transcript_data": get_transcript(post.upload)
     }
     return render(request, "videoapp/watch_template.html", context)
+
 
 """"
 Helper function that retrieves a list of transcripts when passed a VideoObject.
 """
+
+
 def get_transcript(video_object):
     segment_query = Segments.objects.filter(id=video_object.id)
     results = []
@@ -48,7 +51,7 @@ def get_transcript(video_object):
         utterances = Utterances.objects.filter(transcript_id=transcript.id)
         results.append({
             "transcript": transcript,
-            "utterances": utterances })
+            "utterances": utterances})
         segment_begin_offset += segment.segment_duration
     return results
 
@@ -58,14 +61,26 @@ def get_transcript(video_object):
     UPLOAD VIDEO
 
 """""""""""""""""""""
+
+
 @csrf_protect
 def upload_view(request):
     form = VideoUploadForm()
     if request.method == "POST":
         form = VideoUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            video = queue_vp_request(request)
+            # video_duration = get_video_duration( processed_video )
+            newpost = VideoPost(upload=video,
+                                title=request.POST['title'],
+                                description=request.POST['description'],
+                                public_access=request.POST['public_access'],
+                                author=request.user,
+                                upload_duration="")
+            newpost.save()
 
-    context= {
-        'form' : form,
+    context = {
+        'form': form,
     }
     return render(request, "videoapp/upload.html", context)
 
@@ -73,6 +88,8 @@ def upload_view(request):
 """
 Helper Function that returns the duration of a video using the duration of its Segments
 """
+
+
 def get_video_duration(video_object):
     segment_query = Segments.objects.filter(id=video_object.id)
     duration = 0;
@@ -90,5 +107,3 @@ def queue_video(request):
     async_tasks.queue_vp_request(request)
 
     return HttpResponse()
-
-

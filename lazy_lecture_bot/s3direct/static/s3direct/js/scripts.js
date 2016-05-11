@@ -117,23 +117,6 @@
             disableSubmit(false)
             if (status !== 201) {
                 return error(el, 'Sorry, failed to upload to S3.');
-            } else {
-                var csrfToken = getCookie('csrftoken');
-                $.ajaxSetup({
-                    beforeSend: function(xhr, settings) {
-                        if (!this.crossDomain) {
-                            xhr.setRequestHeader("X-CSRFToken", csrfToken);
-                        }
-                    }
-                });
-                $.ajax({
-                        url: "/watch/queue_video/",
-                        type: "POST",
-                        data: {
-                            "file_name": file.name,
-                            "s3_file_key": data["key"],
-                        }
-                    });
             }
             update(el, xml)
         })

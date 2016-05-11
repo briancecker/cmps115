@@ -1,6 +1,7 @@
 import logging
 from lazy_lecture_bot.celery import app
 from main.models import BlobStorage, Videos, PipelineTypes
+from modules.blob_storage import blob_settings
 from modules.blob_storage.blob_storage import create_bsr_from_s3
 from modules.voice_to_text import pipeline_lookup
 from videoapp.models import VideoPost
@@ -29,21 +30,21 @@ def queue_vp_request(request, pipeline_name="watson"):
              if it is ready to be used. None if the request failed.
 
     """
-    s3_key = request.POST['s3_file_key']
-    if "$" not in s3_key:
+    s3_video_url = request.POST["video_file"]
+    bucket_str = blob_settings.bucket_name + "/"
+    if bucket_str not in s3_video_url:
         return None
 
-    s3_key = s3_key.split("$")[0]
-    file_name = request.POST["file_name"]
-    file_key = s3_key + file_name
+    s3_key = s3_video_url.split(bucket_str)
+    s3_key = s3_key[len(s3_key) - 1]
 
     # Video is uploaded and ready to process, do it
     try:
-        video_blob = create_bsr_from_s3(file_key)
+        video_blob = create_bsr_from_s3(s3_key)
     except FileNotFoundError:
         # There is no file with this file_key in the s3 bucket. Let's log this just in case we're getting spammed with
         # fake requests...
-        logger.warn("Failed to find video file in s3. File key: {0}".format(file_key))
+        logger.warn("Failed to find video file in s3. File key: {0}".format(s3_key))
         return None
 
     audio_blob = BlobStorage(file_name="")
@@ -59,13 +60,5 @@ def queue_vp_request(request, pipeline_name="watson"):
 
     # Do the rest of the processing and transcribing asynchronously
     _async_vp.delay(video.id)
-
-    newpost = VideoPost(upload=video,
-                        title="title",
-                        description="description",
-                        public_access=True,
-                        author=request.user,
-                        upload_duration="")
-    newpost.save()
 
     return video
