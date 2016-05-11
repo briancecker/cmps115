@@ -4,6 +4,7 @@ from abc import ABCMeta
 from main.models import Segments, Transcripts, Utterances, Tokens
 from modules.blob_storage.blob_storage import store_bsr_data
 from modules.video_processing import video_processing
+from modules.video_processing.video_processing import get_audio_duration
 
 logger = logging.getLogger("django")
 
@@ -121,6 +122,10 @@ class VideoPipeline:
         video_bytes = video.video_blob.get_blob()
         audio = self._strip_audio(video_bytes)
         self._store_audio(video, audio)
+
+        logger.info("Getting video and audio length")
+        duration = get_audio_duration(audio)
+        video.video_duration = duration
 
         logger.info("segmenting")
         video.processing_status = "Segmenting Audio"

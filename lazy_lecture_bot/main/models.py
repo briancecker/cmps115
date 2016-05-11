@@ -47,6 +47,7 @@ class Videos(models.Model):
     finished_processing = models.BooleanField()
     processing_status = models.CharField(max_length=20)
     pipeline_type = models.ForeignKey("PipelineTypes")
+    video_duration = models.FloatField(default=-1.0)
 
     def __unicode__(self):
         return self.video_id
