@@ -5,7 +5,6 @@ Definition of models.
 from django.db import models
 # Create your models here.
 from django.utils import timezone
-from django.conf import settings
 from modules.blob_storage import blob_settings
 
 
@@ -21,17 +20,8 @@ class BlobStorage(models.Model):
         Returns: Get the blob as bytes
 
         """
-        blob_type = getattr(settings, "BLOB_STORAGE_TYPE")
-        if blob_type == "local":
-            import os
-            date = self.date
-            with open(os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None), str(date.year),
-                                                   str(date.month), str(date.day), self.file_name)), 'rb') as fh:
-                return fh.read()
-        elif blob_type == "azure":
-            return blob_settings.block_blob_service.get_blob_to_bytes("blobs", self.file_name)
-        elif blob_type == "s3":
-            return blob_settings.boto3_client.get_object(Key=self.file_name, Bucket="lazylecturebot")["Body"].read()
+        return blob_settings.boto3_client.get_object(
+            Key=self.file_name, Bucket=blob_settings.bucket_name)["Body"].read()
 
     def get_url(self):
         """
@@ -39,27 +29,25 @@ class BlobStorage(models.Model):
         Returns: if blob storage is "local", return a file system path, otherwise return a ur
 
         """
-        blob_type = getattr(settings, "BLOB_STORAGE_TYPE")
-        if blob_type == "local":
-            import os
-            date = self.date
-            return os.path.abspath(os.path.join(getattr(settings, "BLOB_STORAGE_ROOT", None), str(date.year),
-                                                str(date.month), str(date.day), self.file_name))
-        elif blob_type == "azure":
-            raise NotImplementedError("get_url for azure is not setup")
-        elif blob_type == "s3":
-            location = blob_settings.boto3_client.get_bucket_location(Bucket="lazylecturebot")["LocationConstraint"]
-            return "https://s3-{bucket_location}.amazonaws.com/lazylecturebot/{file_name}".format(
-                bucket_location=location, file_name=self.file_name)
+        location = blob_settings.boto3_client.get_bucket_location(Bucket="lazylecturebot")["LocationConstraint"]
+        return "https://s3-{bucket_location}.amazonaws.com/lazylecturebot/{file_name}".format(
+            bucket_location=location, file_name=self.file_name)
+
+
+class PipelineTypes(models.Model):
+    name = models.CharField(max_length=20)
 
 
 class Videos(models.Model):
-    title = models.CharField(max_length = 100)
+    title = models.CharField(max_length=100)
     audio_blob = models.ForeignKey("BlobStorage", related_name="audio_path")
     video_blob = models.ForeignKey("BlobStorage", related_name="video_path")
     user_id = models.IntegerField()
     # user_id = models.ForeignKey()  # this still needs a path to link to blob_storage user_ID
     finished_processing = models.BooleanField()
+    processing_status = models.CharField(max_length=20)
+    pipeline_type = models.ForeignKey("PipelineTypes")
+    video_duration = models.FloatField(default=-1.0)
 
     def __unicode__(self):
         return self.video_id

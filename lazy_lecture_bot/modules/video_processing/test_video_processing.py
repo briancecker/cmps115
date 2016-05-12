@@ -5,7 +5,8 @@ import wave
 import io
 import os
 from modules import file_utilities
-from modules.video_processing.video_processing import new_audio_buffer, read_audio_segments_by_time, strip_audio
+from modules.video_processing.video_processing import new_audio_buffer, read_audio_segments_by_time, strip_audio, \
+    get_audio_duration
 
 
 class VideoProcessingTest(unittest.TestCase):
@@ -43,6 +44,10 @@ class VideoProcessingTest(unittest.TestCase):
                 wave_write.close()
             except wave.Error as e:
                 self.fail("Failed to write audio segments with wave.Error: {0}".format(e))
+
+    def test_get_audio_duration(self):
+        duration = get_audio_duration(self.test_audio)
+        self.assertLessEqual(duration - 235.937, 0.001)
 
 
 if __name__ == "__main__":

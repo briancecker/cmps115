@@ -27,7 +27,7 @@ def strip_audio(video):
     """
     p = subprocess.Popen(STRIP_AUDIO_CMD.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     audio, err = p.communicate(input=video)
-    logger.info(err.decode("utf-8"))
+    logger.warn(err.decode("utf-8"))
     return_code = p.returncode
 
     return audio, return_code
@@ -47,7 +47,6 @@ def read_audio_frames(audio, n_frames):
     with wave.open(io.BytesIO(audio), 'rb') as wave_read:
         # total_frames = wave_read.getnframes()  # getnframes IS BUGGED
         frame_size = wave_read.getnchannels() * wave_read.getsampwidth()
-        read_frames = 0
         all_frames = b''
         while True:
             frames = wave_read.readframes(n_at_once)
@@ -74,6 +73,13 @@ def read_audio_segments_by_time(audio, time):
     params = get_audio_params(audio)
     frames_per_segment = int(time * params["framerate"])
     return read_audio_frames(audio, frames_per_segment)
+
+
+def get_audio_duration(audio):
+    params = get_audio_params(audio)
+    n_frames = sum(bytes_to_n_frames(frame_group, params["nchannels"], params["sampwidth"])
+                   for frame_group in read_audio_frames(audio, 5000))
+    return n_frames / params["framerate"]
 
 
 def get_audio_params(audio):

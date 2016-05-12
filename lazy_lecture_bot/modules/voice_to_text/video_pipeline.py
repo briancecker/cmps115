@@ -1,13 +1,10 @@
 import logging
-import wave
 
-import importlib
-import io
 from abc import ABCMeta
-from lazy_lecture_bot.celery import app
-from main.models import Videos, Segments, Transcripts, Utterances, Tokens
+from main.models import Segments, Transcripts, Utterances, Tokens
 from modules.blob_storage.blob_storage import store_bsr_data
 from modules.video_processing import video_processing
+from modules.video_processing.video_processing import get_audio_duration
 
 logger = logging.getLogger("django")
 
@@ -62,59 +59,6 @@ def store_transcripts(db_video, db_segments, transcripts):
                 db_token.save()
 
 
-def _get_class_information(cls):
-    return cls.__module__, cls.__class__.__name__, cls.__dict__
-
-
-def _construct_from_class_information(cls_info):
-    module, class_name, attrs = cls_info
-    class_def = getattr(importlib.import_module(module), class_name)
-    obj = class_def()
-    for key, val in attrs.items():
-        setattr(obj, key, val)
-
-    return obj
-
-
-@app.task(name="process_video_async")
-def process_video_async(video_id, audio_segmenter_info, audio_transcriber_info):
-    """
-    Finish processing the video asynchronously as a celery task.
-    We have to pass json serializable arguments to this task, so we have to make some strange argument decisions.
-    For instance, in order to pass our audio segmenter and transcriber, we need to record the information to reconstruct
-    them and pass this infromation instead of the actual objects. We use the functions _get_class_information and
-    _construct_from_class_information to do this.
-    Args:
-        video_id: The id of the video to process
-        audio_segmenter_info: The result of calling _get_class_information on the audio segmenter
-        audio_transcriber_info: The result of calling _get_class_information on the audio segmenter
-
-    Returns:
-
-    """
-    logger.info("started async processing for video_id: {0}".format(video_id))
-    # Construct the segmenter and transcriber we need
-    audio_segmenter = _construct_from_class_information(audio_segmenter_info)
-    audio_transcriber = _construct_from_class_information(audio_transcriber_info)
-
-
-    # Get the relevant video and process
-    video = Videos.objects.all().get(pk=video_id)
-
-    logger.info("segmenting")
-    audio_segments = audio_segmenter.segment(video.audio_blob.get_blob())
-
-    db_segments = store_segments(video, audio_segments)
-    logger.info("transcribing {0} segments".format(len(db_segments)))
-    transcripts = [audio_transcriber.transcribe(segment.audio_blob.get_blob()) for segment in db_segments]
-    store_transcripts(video, db_segments, transcripts)
-
-    video.finished_processing = True
-    video.save()
-
-    # logger.info("Done async processing video with id: {0}".format(video.id))
-
-
 class VideoPipeline:
     """
     Base class for video pipelines.
@@ -128,7 +72,6 @@ class VideoPipeline:
     def __init__(self, audio_segmenter=None, audio_transcriber=None):
         self.audio_segmenter = audio_segmenter
         self.audio_transcriber = audio_transcriber
-        self.video = None
 
     def _strip_audio(self, video):
         """
@@ -146,43 +89,58 @@ class VideoPipeline:
 
         return audio
 
-    def _store_video_and_audio(self, video, audio):
+    def _store_audio(self, video, audio):
         """
         Store the audio and video data and setup Videos entry in database.
         Args:
-            video: video as bytes
+            video: incomplete Videos record
             audio: audio as bytes
 
         Returns: the Videos entry
 
         """
-        video_blob = store_bsr_data(video)
         audio_blob = store_bsr_data(audio)
 
         # Need to do something with user_id and finished_processing
-        self.video = Videos(audio_blob=audio_blob, video_blob=video_blob, user_id=1, finished_processing=False)
-        self.video.save()
+        video.audio_blob = audio_blob
+        video.save()
 
     def process_video(self, video):
         """
         Submit a video to be processed by the pipeline. When finished processing, the video will be stored, segmented,
-        transcribed, and ready to use. Some of this processing will run asynchronously, so just because the function
-        returns, that does not mean that the video is done processing. In order to determine if the video is done being
-        processed, check that the "finished_processing" field of the Videos entry returned from this function is set
-        to true.
+        transcribed, and ready to use. In order to determine if the video is done being processed, check that the
+        "finished_processing" field of the Videos entry returned from this function is set to true.
         Args:
-            video: The video file as bytes
+            video: The incomplete Videos record. Must have a valid video_blob.
 
-        Returns: The Videos entry created in the database.
+        Returns:
 
         """
-        audio = self._strip_audio(video)
-        wave_read = wave.open(io.BytesIO(audio), 'rb')
-        print(wave_read.getnframes())
-        self._store_video_and_audio(video, audio)
+        logger.info("Stripping audio and storing it")
+        video.processing_status = "Stripping Audio"
+        video.save()
+        video_bytes = video.video_blob.get_blob()
+        audio = self._strip_audio(video_bytes)
+        self._store_audio(video, audio)
 
-        # Can't pass objects directly, so we have to deconstruct the object into interpretable and serializable parts
-        process_video_async.delay(self.video.id, _get_class_information(self.audio_segmenter),
-                                  _get_class_information(self.audio_transcriber))
+        logger.info("Getting video and audio length")
+        duration = get_audio_duration(audio)
+        video.video_duration = duration
 
-        return self.video
+        logger.info("segmenting")
+        video.processing_status = "Segmenting Audio"
+        video.save()
+        audio_segments = self.audio_segmenter.segment(video.audio_blob.get_blob())
+        db_segments = store_segments(video, audio_segments)
+
+        logger.info("transcribing {0} segments".format(len(db_segments)))
+        video.processing_status = "Transcribing Audio"
+        video.save()
+        transcripts = [self.audio_transcriber.transcribe(segment.audio_blob.get_blob()) for segment in db_segments]
+        store_transcripts(video, db_segments, transcripts)
+
+        video.processing_status = ""
+        video.finished_processing = True
+        video.save()
+
+        logger.info("Done processing video with id: {0}".format(video.id))

@@ -9,7 +9,8 @@
 
 <div class="container-fluid">
 	<div class="row">
-		<form method="POST" action="." class="col-md-4 col-md-offset-4" enctype="multipart/form-data">{% csrf_token %}
+		<form id="upload-form" method="POST" action="." class="col-md-4 col-md-offset-4"
+              enctype="multipart/form-data">{% csrf_token %}
 			<div><h1>Upload A Video</h1></div>
 			<!-- TITLE GROUP-->
 			<div class="form-group">
@@ -31,10 +32,12 @@
 			<label>Video</label>
 			<div class="form-group" style="padding: 20px 20px 60px 20px; border: solid 1px gray">
 				{{ form.video_file }}
-			</div>
 
+			<div>{{form.media}}</div>
 			<!--SUBMIT BUTTON-->
-			<button type="submit" class="btn btn-primary btn-lg" style="background-color: rgb(46, 204, 113); border-radius: 0px; border-style: none;"><b>UPLOAD</b></button>
+            <div class="submit-row">
+                <button type="submit" class="btn btn-primary btn-lg" style="background-color: rgb(46, 204, 113); border-radius: 0px; border-style: none;"><b>UPLOAD</b></button>
+            </div>
 		</form>
 	</div>
 </div>

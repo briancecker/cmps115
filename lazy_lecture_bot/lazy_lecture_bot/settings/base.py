@@ -13,8 +13,6 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-from modules import file_utilities
-
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".."))
 
 # Quick-start development settings - unsuitable for production
@@ -126,6 +124,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_collected')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, "s3direct", "static")
 ]
 
 # And one more static files thing... I'm honestly not quite sure I understand this one, but see this link:
@@ -133,10 +132,6 @@ STATICFILES_DIRS = [
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
-
-# Define space to store blob files
-# see the wiki for more information: https://github.com/briancecker/cmps115/wiki/Blob-and-Video-Storage/
-BLOB_STORAGE_ROOT = os.path.join(file_utilities.TMP_DIR, "BLOB_STORAGE_ROOT")
 
 # These are where we'll store uploaded media for now
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
