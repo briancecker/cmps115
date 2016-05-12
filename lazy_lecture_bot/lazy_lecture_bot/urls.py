@@ -33,7 +33,3 @@ urlpatterns = [
     url(r'^upload/', video_views.upload_view, name="upload"),
     url(r'^s3direct/', include('s3direct.urls')),
 ]
-
-if settings.DEBUG:
-  urlpatterns.append(url(r'^media/(?P<path>.*)$', 
-    'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}))

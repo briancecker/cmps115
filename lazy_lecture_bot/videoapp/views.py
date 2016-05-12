@@ -21,16 +21,17 @@ from main.models import Segments, Transcripts, Utterances
 	WATCH VIDEOS
 
 """""""""""""""""""""
-def watch_video_view(request, video_id):
-	post = VideoPost.objects.get(pk=video_id)
+def watch_video_view(request, videopost_id):
+	post = VideoPost.objects.get(pk=videopost_id)
 	#data = serializers.serialize("json", Utterances.objects.all())
 	#print(data)
-	video_url = post.upload.video_blob.get_url()
+	#video_url = post.upload.video_blob.get_url()
+	video_url = post.upload
 	context = {
 		"time" : time,
 		"post" : post,
 		"video_url" : video_url,
-		"transcript_data" : get_transcript(post.upload)
+		#"transcript_data" : get_transcript(post.upload)
 	}
 	return render(request, "videoapp/watch_template.html", context)
 
@@ -61,17 +62,20 @@ def upload_view(request):
 	form = VideoUploadForm()
 	if request.method == "POST":
 		form = VideoUploadForm(request.POST, request.FILES)
-		#if form.is_valid():
+		if form.is_valid():
 			#pipeline = WatsonVideoPipeline()
 			#processed_video = pipeline.process_video( request.FILES['video_file'].read() )
 			#video_duration = get_video_duration( processed_video )
-			#newpost = VideoPost(upload = processed_video,
-			#					title = request.POST['title'],
-			#					description = request.POST['description'],
-			#					public_access = request.POST['public_access'],
-			#					author = request.user,
-			#					upload_duration = video_duration)
-			#newpost.save()
+			newpost = VideoPost(
+								upload = request.POST['video_file'],
+								title = request.POST['title'],
+								description = request.POST['description'],
+								public_access = request.POST['public_access'],
+								author = request.user,
+								#upload_duration = video_duration
+								)
+			newpost.save()
+			return redirect("watch_video", newpost.id)
 
 	context= {
 		'form' : form,

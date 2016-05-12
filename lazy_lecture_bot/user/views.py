@@ -6,6 +6,9 @@ from django.contrib.auth.decorators import login_required
 from user.forms import *
 from django.views.decorators.csrf import csrf_protect
 
+
+from videoapp.models import VideoPost
+
 """""""""""""""""
 
   	SHOW USER
@@ -14,6 +17,7 @@ from django.views.decorators.csrf import csrf_protect
 def show_user(request, username="None"):
 	if username is not "None":
 		user_instance = get_object_or_404(User,  username=username)
+		user_posts = VideoPost.objects.filter(public_access=True, author=user_instance).order_by('publish_date')
 	else:
 		if request.user.is_active:
 			user_instance = request.user
@@ -21,6 +25,7 @@ def show_user(request, username="None"):
 			return redirect("login")
 
 	context = {
+			"user_posts" : user_posts,
 			"user_instance" : user_instance,
 		}
 	return render(request, "user/user_page.html", context)
@@ -57,7 +62,6 @@ def signup_view(request):
   	LOGIN USER
 
 """""""""""""""
-
 def login_user(request):
 	if not request.user.is_active:
 		if request.method == "POST":

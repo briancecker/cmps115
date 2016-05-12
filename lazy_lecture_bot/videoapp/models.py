@@ -4,6 +4,9 @@ from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
+from s3direct.fields import S3DirectField
+
+
 def get_ghost_user():
     return get_user_model().objects.get_or_create(username='deleted')[0]
 
@@ -11,10 +14,13 @@ def user_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/videos/<filename>
     return 'user_{0}/videos/{1}'.format(instance.author.id, filename)
 
+def calculate_video_duration(video_path):
+	return ''
+
 # Create your models here.
 class VideoPost(models.Model):
 	"""Model that aggregates the metadata of the video post"""
-	upload = models.ForeignKey('main.Videos')
+	upload = S3DirectField(dest='vids')
 	title = models.CharField(max_length = 50)
 	description = models.CharField(max_length = 455)
 	public_access = models.BooleanField()
