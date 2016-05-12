@@ -45,18 +45,24 @@ def store_transcripts(db_video, db_segments, transcripts):
     Returns: None
 
     """
+    segment_offset = 0.0
     for db_segment, transcript in zip(db_segments, transcripts):
         db_trans = Transcripts(video_id=db_video, segment_id=db_segment, text=transcript["transcript"])
         db_trans.save()
         for utterance_index, utterance in enumerate(transcript["utterances"]):
             db_utterance = Utterances(transcript_id=db_trans, utterance_index=utterance_index,
-                                      start_time=utterance["start"], end_time=utterance["end"],
+                                      start_time=segment_offset + utterance["start"],
+                                      end_time=segment_offset + utterance["end"],
                                       text=utterance["transcript"])
             db_utterance.save()
             for token_index, token in enumerate(utterance["tokens"]):
-                db_token = Tokens(utterance_id=db_utterance, token_index=token_index, start_time=token["start"],
-                                  end_time=token["end"], text=token["token"])
+                db_token = Tokens(utterance_id=db_utterance, token_index=token_index,
+                                  start_time=segment_offset + token["start"],
+                                  end_time=segment_offset + token["end"],
+                                  text=token["token"])
                 db_token.save()
+
+        segment_offset += db_segment.segment_duration
 
 
 class VideoPipeline:
@@ -86,6 +92,9 @@ class VideoPipeline:
         audio, return_code = video_processing.strip_audio(video)
         if return_code != 0:
             raise VideoPipelineException("ffmpeg returned non-zero error code. Returned code: {0}".format(return_code))
+
+        logger.info("ffmpeg in strip_audio returned return_code: {0}, audio_result is length: {1}".format(return_code,
+                                                                                                          len(audio)))
 
         return audio
 
@@ -120,7 +129,9 @@ class VideoPipeline:
         video.processing_status = "Stripping Audio"
         video.save()
         video_bytes = video.video_blob.get_blob()
+        logger.info("Video bytes length: {0}".format(len(video_bytes)))
         audio = self._strip_audio(video_bytes)
+        logger.info("Audio is of length {0}".format(len(audio)))
         self._store_audio(video, audio)
 
         logger.info("Getting video and audio length")

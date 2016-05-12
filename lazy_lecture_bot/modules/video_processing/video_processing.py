@@ -1,18 +1,78 @@
+import os
+
 import io
 import logging
 import subprocess
 import sys
 import wave
 
-# STRIP_AUDIO_CMD = "ffmpeg -i - -y -ab 160k -ac 2 -ar 16000 -vn -"
 NUM_CHANNELS = 2
 SAMPLE_FORMAT = "s16"  # 16 bit depth
 SAMPLE_RATE = 16000
-STRIP_AUDIO_CMD = "ffmpeg -vcodec h264 -acodec aac -i - -y -ab 160k -ac {num_channels} -ar {sample_rate} " \
-                  "-vn -sample_fmt {sample_fmt} -f wav -".format(num_channels=NUM_CHANNELS, sample_rate=SAMPLE_RATE,
-                                                                 sample_fmt=SAMPLE_FORMAT)
-
+PROBE_SIZE = os.environ.get("PROBE_SIZE", "5000000")
+ANALYZE_DURATION = os.environ.get("ANALYZE_DURATION", "200000000")
+STRIP_AUDIO_CMD = "ffmpeg -probesize {probe_size} " \
+                  "-analyzeduration {analyze_duration} " \
+                  "-vcodec h264 " \
+                  "-acodec aac " \
+                  "-i - " \
+                  "-y " \
+                  "-ab 160k " \
+                  "-ac {num_channels} " \
+                  "-ar {sample_rate} " \
+                  "-vn " \
+                  "-sample_fmt {sample_fmt} " \
+                  "-f wav " \
+                  "-".format(num_channels=NUM_CHANNELS,
+                             sample_rate=SAMPLE_RATE,
+                             sample_fmt=SAMPLE_FORMAT,
+                             probe_size=PROBE_SIZE,
+                             analyze_duration=ANALYZE_DURATION,
+                             )
 logger = logging.Logger("django")
+
+
+class BadWaveFormatError(Exception):
+    pass
+
+
+WAV_HEADER_LENGTH = 16
+CORRECT_WAV_HEADER = b'RIFF\xa6N\x19\x00WAVEfmt '
+WRONG_WAV_HEADER = b'RIFF\x00\x00\x00\x00WAVEfmt '
+
+
+def fix_audio(wav_bytes):
+    """
+    This is INSANE, but... the wave library is a bugged piece of shit, and it doesn't know how to handle different
+    .wav formats, so this is literally a byte-hack trick to deal with that when we get other (likely correct) wavs.
+    We try to fix them, and we return the fixed wav as bytes if possible, otherwise, we raise some error
+    Args:
+        wav_bytes: Wave file as bytes
+
+    Returns:
+    Raises: BadWaveFormatError: if we cannot fix it, and we know it raises a "not a WAVE file" error
+
+    """
+    audio_header = wav_bytes[:WAV_HEADER_LENGTH]
+    if audio_header == CORRECT_WAV_HEADER:
+        return wav_bytes
+    elif audio_header == WRONG_WAV_HEADER:
+        # Here we go...
+        corrected_audio = CORRECT_WAV_HEADER + wav_bytes[WAV_HEADER_LENGTH:]
+        # At least it's what we know is usually wrong.
+        try:
+            wave.open(io.BytesIO(corrected_audio), "rb")
+        except wave.Error as e:
+            if str(e) == "not a WAVE file":
+                # Well, that's the bad error.
+                raise BadWaveFormatError("w")
+            else:
+                # Who knows, just propagate it.
+                raise e
+    else:
+        corrected_audio = wav_bytes
+
+    return corrected_audio
 
 
 def strip_audio(video):
@@ -25,10 +85,14 @@ def strip_audio(video):
     Returns: The audio as bytes and the ffmpeg return code
 
     """
+    print("STRIP CMD:")
+    print("Using strip_audio_cmd: \n\t{0}".format(STRIP_AUDIO_CMD))
     p = subprocess.Popen(STRIP_AUDIO_CMD.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     audio, err = p.communicate(input=video)
-    logger.warn(err.decode("utf-8"))
+    logger.warning(err.decode("utf-8"))
     return_code = p.returncode
+
+    # corrected_audio = fix_audio(audio)
 
     return audio, return_code
 

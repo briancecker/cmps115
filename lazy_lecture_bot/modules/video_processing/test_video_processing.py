@@ -6,7 +6,7 @@ import io
 import os
 from modules import file_utilities
 from modules.video_processing.video_processing import new_audio_buffer, read_audio_segments_by_time, strip_audio, \
-    get_audio_duration
+    get_audio_duration, fix_audio
 
 
 class VideoProcessingTest(unittest.TestCase):
@@ -32,6 +32,20 @@ class VideoProcessingTest(unittest.TestCase):
             # This is actually the wrong number of frames because getnframes() seems to have a bug in some cases,
             # but it's consistently wrong in this case..
             self.assertEqual(wave_read.getnframes(), 1073741823)
+
+    def test_bad_wav_fix(self):
+        """
+        This just shouldn't raise an error
+        Returns:
+
+        """
+        bad_wavs_dir = file_utilities.abs_resource_path(["test_videos", "bad_wavs"])
+        for f in os.listdir(bad_wavs_dir):
+            with open(os.path.join(bad_wavs_dir, f), "rb") as fh:
+                audio_bytes = fh.read()
+                fixed = fix_audio(audio_bytes)
+                with wave.open(io.BytesIO(fixed), "rb") as wr:
+                    print(wr.getnframes())
 
     def test_audio_segmenting(self):
         self.assertEqual(len(list(read_audio_segments_by_time(self.test_audio, 14))), 17)

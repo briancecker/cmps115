@@ -1,0 +1,9 @@
+[
+  {
+    "model": "main.PipelineTypes",
+    "pk": 1,
+    "fields": {
+      "name": "watson"
+    }
+  }
+]
