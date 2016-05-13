@@ -14,13 +14,13 @@ def user_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/videos/<filename>
     return 'user_{0}/videos/{1}'.format(instance.author.id, filename)
 
-def calculate_video_duration(video_path):
-	return ''
+#def calculate_video_duration(video_path):
+	#return ''
 
 # Create your models here.
 class VideoPost(models.Model):
 	"""Model that aggregates the metadata of the video post"""
-	upload = S3DirectField(dest='vids')
+	upload = models.ForeignKey('main.Videos')
 	title = models.CharField(max_length = 50)
 	description = models.CharField(max_length = 455)
 	public_access = models.BooleanField()

@@ -67,12 +67,13 @@ def upload_view(request):
         if form.is_valid():
             video = queue_vp_request(request)
             # video_duration = get_video_duration( processed_video )
-            newpost = VideoPost(upload=video,
-                                title=request.POST['title'],
-                                description=request.POST['description'],
-                                public_access=request.POST['public_access'],
-                                author=request.user,
-                                upload_duration="")
+            newpost = VideoPost(upload = video,
+                                title = request.POST['title'],
+                                description = request.POST['description'],
+                                public_access = request.POST['public_access'],
+                                author = request.user,
+                                upload_duration = ''
+                                )
             newpost.save()
             return HttpResponseRedirect('/')
 
