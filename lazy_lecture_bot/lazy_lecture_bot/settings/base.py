@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     "main.apps.MainConfig",
     'videoapp',
     's3direct'
+    'haystack'
+    'elasticsearch'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -82,6 +84,16 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://127.0.0.1:8001/',
+        'INDEX_NAME': 'haystack',
+        'TIMEOUT' : 60
+    },
+}
+
 
 
 # Password validation
