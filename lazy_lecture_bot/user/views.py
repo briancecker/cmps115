@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from user.forms import *
 from django.views.decorators.csrf import csrf_protect
-
+from django.contrib import messages
 
 from videoapp.models import VideoPost
 
@@ -69,7 +69,10 @@ def login_user(request):
 			if form.is_valid():
 				user = form.login(request)
 				login(request, user)
+				messages.add_message(request, messages.SUCCESS, 'Successfully Logged In! :D')
 				return redirect("/")
+			else:
+				messages.add_message(request, messages.ERROR, 'Invalid Username/Password Combination :(', 'danger')
 	else:
 		return redirect(show_user)
 	form = LoginForm()
@@ -85,7 +88,10 @@ def auth_login(request): ## This is where the actual authentication is happening
 		if form.is_valid():
 			user = form.login(request)
 			login(request, user)
-			return redirect(redirect_to)
+			messages.add_message(request, messages.SUCCESS, 'Successfully Logged In! :D')
+		else:
+			messages.add_message(request, messages.ERROR, 'Invalid Username/Password Combination :(', 'danger')
+		return redirect(redirect_to)
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

@@ -7,6 +7,7 @@
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+	<script src="https://use.fontawesome.com/e900c63c6f.js"></script>
 	 {% endblock head %}
 </head>
 
@@ -74,6 +75,17 @@
 			</div>
 
 		</nav> <!--END OF NAVIGATION BAR -->
+		{% if messages %}
+			{% for message in messages %}
+				<div class="container">
+	        		<div class="alert alert-{{message.tags}} fade in" role="alert" >
+	        			<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+	        			<strong>{{ message }}</strong>
+	        		</div>
+        		</div>
+        	{% endfor %}
+		{% endif %}
+
 		{% endblock content %}
 	</div>
 	
