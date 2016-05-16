@@ -19,6 +19,7 @@ from django.conf import settings
 
 from user import views as user_views
 from videoapp import views as video_views
+from haystack.views import SearchView
 
 urlpatterns = [
     # map sends the default index page to be mapped by the main app
@@ -32,4 +33,5 @@ urlpatterns = [
     url(r'^watch/', include('videoapp.urls'), name="video_watch"),
     url(r'^upload/', video_views.upload_view, name="upload"),
     url(r'^s3direct/', include('s3direct.urls')),
+    url()r'^search/', SearchView('/templates/search/search.html'),name='haystack_search'
 ]
