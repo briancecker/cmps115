@@ -14,25 +14,25 @@ from django.core import serializers
 from modules.voice_to_text.watson.watson_video_pipeline import WatsonVideoPipeline
 from .forms import VideoUploadForm
 from .models import VideoPost
-from main.models import Segments, Transcripts, Utterances
+from main.models import Segments, Transcripts, Utterances, Videos
 
 """""""""""""""""""""
 
     WATCH VIDEOS
 
 """""""""""""""""""""
-
-
-def watch_video_view(request, video_id):
-    post = VideoPost.objects.get(pk=video_id)
+def watch_video_view(request, videopost_id):
+    post = VideoPost.objects.get(pk=videopost_id)
     # data = serializers.serialize("json", Utterances.objects.all())
-    # print(data)
     video_url = post.upload.video_blob.get_url()
+
     context = {
         "time": time,
         "post": post,
         "video_url": video_url,
-        "transcript_data": get_transcript(post.upload)
+        "transcript_data": get_transcript(post.upload),
+        "finished_processing": post.upload.finished_processing,
+        "processing_status": post.upload.processing_status,
     }
     return render(request, "videoapp/watch_template.html", context)
 
@@ -61,8 +61,6 @@ def get_transcript(video_object):
     UPLOAD VIDEO
 
 """""""""""""""""""""
-
-
 @csrf_protect
 def upload_view(request):
     form = VideoUploadForm()
@@ -70,21 +68,22 @@ def upload_view(request):
         form = VideoUploadForm(request.POST, request.FILES)
         if form.is_valid():
             video = queue_vp_request(request)
-            # video_duration = get_video_duration( processed_video )
-            newpost = VideoPost(upload=video,
-                                title=request.POST['title'],
-                                description=request.POST['description'],
-                                public_access=request.POST['public_access'],
-                                author=request.user,
-                                upload_duration="")
+
+            newpost = VideoPost(upload = video,
+                                title = request.POST['title'],
+                                description = request.POST['description'],
+                                public_access = request.POST['public_access'],
+                                author = request.user,
+                                upload_duration = ''
+                                )
             newpost.save()
+
             return HttpResponseRedirect('/')
 
     context = {
         'form': form,
     }
     return render(request, "videoapp/upload.html", context)
-
 
 """
 Helper Function that returns the duration of a video using the duration of its Segments

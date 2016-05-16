@@ -1,10 +1,31 @@
 {% extends "main/base.html" %}
-{% block title %}{{user_instance.username}} | {{block.super}}{% endblock title %}
+{% block title %}{{ user_instance.username }} | {{ block.super }}{% endblock title %}
 {% block content %}
 {{block.super}}
-<h1><a href='{% url "profile" username=user_instance.username %}'>{{user_instance.username}}</a></h1>
-<div>
-	{{user_instance.username}}'s videos
-	<div>None</div>
+<div class="container">
+	<div class="row">
+		<h1>{{ user_instance.username }}'s videos</h1>
+	</div>
+	<div class="row">
+		{% for post in user_posts %}
+		<!-- VIDEO PREVIEW -->
+		<div class="col-sm-3"> 
+			<div class="thumbnail" style="border-style: none;">
+				<!-- THUMBNAIL IMAGE -->
+	      		<a href="{% url 'watch_video' post.id %}"><img src='https://placeholdit.imgix.net/~text?txtsize=23&txt=250%C3%97140&w=254&h=140' alt="..." style="height: 140px; background-color: rgb(189, 195, 199)" /></a>
+	      		<!-- OTHER INFORMATION -->
+	      		<div class="caption" style="padding: 10px 0px 0px 0px;">
+	      			<!-- VIDEO TITLE -->
+	        		<b><a href="{% url 'watch_video' post.id %}">{{ post.title }}</a></b>
+	        		<!-- VIDEO AUTHOR -->
+	        		<div><a href="{% url 'profile' post.author %}" style="color:black">{{ post.author }}</a></div>
+	        		<p>
+	        		{{ post.upload_duration }}<br>
+	        		Posted on: {{ post.publish_date }}</p>
+	      		</div>
+	      	</div>
+	    </div><!-- END OF VIDEO PREVIEW -->
+		{% endfor %}
+	</div>
 </div>
 {% endblock content %}

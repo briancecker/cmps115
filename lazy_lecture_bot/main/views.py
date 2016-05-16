@@ -4,7 +4,7 @@ from videoapp.models import VideoPost
 
 def index(request):
 	context = {
-		"vp" : VideoPost.objects.all().filter(public_access=True),
+		"vp" : VideoPost.objects.filter(public_access=True).order_by('publish_date'),
 		"user" : request.user,
 		"n" : range(15), # USED FOR TESTING
 	}
