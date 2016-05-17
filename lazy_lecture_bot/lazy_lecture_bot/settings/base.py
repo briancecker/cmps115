@@ -38,9 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "main.apps.MainConfig",
     'videoapp',
-    's3direct'
-    'haystack'
-    'elasticsearch'
+    's3direct',
+    'haystack',
+    'elasticsearch',
 ]
 
 MIDDLEWARE_CLASSES = [
