@@ -1,2 +1,0 @@
-{{ object.script }}
-{{ object.segment_id }}
