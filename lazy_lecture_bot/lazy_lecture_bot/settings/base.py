@@ -88,13 +88,15 @@ DATABASES = {
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://127.0.0.1:8001/',
+        # "ENGINE": 'elasticstack.backends.ConfigurableElasticSearchEngine',
+        'URL': os.environ.get('HAYSTACK_URL', 'http://127.0.0.1:8001/'),
         'INDEX_NAME': 'haystack',
-        'TIMEOUT' : 60
-    },
+        "SETTINGS_NAME": "default",
+        'TIMEOUT': 60
+    }
 }
 
-
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators

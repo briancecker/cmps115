@@ -17,18 +17,32 @@
 			<div style="overflow: auto; height: 300px;">{{ post.description }}</div>
 		</div>
 
-		<div class="col-md-5">
+		<dl class="col-md-5">
 			<div><h3>Transcript:</h3></div>
 			<div style="overflow: auto; height: 780px">
 			{% if not finished_processing %}
 				<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
 				{{ processing_status }}...
 			{% else %}
+                <div class="utterance-search">
+                    <form class="utterance-form" method="POST" action="/search_utterances/" style="width: 100%">
+                        {% csrf_token %}
+                        <input name="video-id" type="hidden" value="{{ video_id }}" />
+                        <div class="form-group input-group" style="width: 100%">
+                            <input name="query" type="text" class="form-control" autocomplete="off"
+                                   placeholder="Type to Filter Utterances" />
+                        </div>
+                    </form>
+                </div>
 				<dl class="dl-horizontal">
 					{% for transcript in transcript_data %}
 						{% for utterance in transcript.utterances %}
-							<div class="utterance" id={{utterance.id}}
-							onclick="goToVideoTime( {{ utterance.start_time }} );" startTime="{{ utterance.start_time }}" endTime="{{ utterance.end_time }}">
+							<div class="utterance"
+                                 data-utterance-id="{{ utterance.id }}"
+                                 id="utterance_{{ utterance.id }}"
+                                 onclick="goToVideoTime( {{ utterance.start_time }} );"
+                                 startTime="{{ utterance.start_time }}"
+                                 endTime="{{ utterance.end_time }}">
 								<dt>{{ utterance.start_time }} - {{ utterance.end_time }}
 									<dd>{{ utterance.text }}</dd>
 								</dt>
@@ -77,6 +91,45 @@
 		var video = document.getElementById("feature");
 		video.currentTime = start_time;
 	}
+
+    var $utterance_form = $(".utterance-form");
+    var $query_input = $utterance_form.find("input[name='query']");
+    var video_id = $utterance_form.find("input[name='video-id']").val();
+
+    $utterance_form.on("submit", function(event) {
+        event.preventDefault();
+    });
+
+    $query_input.on("input", function(event) {
+        event.preventDefault();
+        $.ajax({
+            url: "/search_utterances/",
+            type: "POST",
+            data : {
+                "video_id": video_id,
+                "query": $query_input.val(),
+            },
+
+            success: function(json) {
+                var utterance_ids = new Set(json["utterance_ids"]);
+                $(".utterance").each(function() {
+                    console.log("utterance: " + $(this).data("utterance-id"));
+                    if (!utterance_ids.has(parseInt($(this).data("utterance-id")))) {
+                        // utterance is not in the searched set, hide it
+                        $(this).slideUp();
+                    } else {
+                        // utterance is in the searched set, show it
+                        $(this).slideDown();
+                    }
+                });
+            },
+
+            error: function(xhr, errmsg, err) {
+
+            }
+        });
+
+    });
 </script>
 
 <style>
