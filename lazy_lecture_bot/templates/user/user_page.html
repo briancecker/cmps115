@@ -2,15 +2,27 @@
 {% block title %}{{ user_instance.username }} | {{ block.super }}{% endblock title %}
 {% block content %}
 {{block.super}}
-<div class="container">
+<div class="container-fluid user-profile" style="top:-10px;">
 	<div class="row">
-		<h1>{{ user_instance.username }}'s videos</h1>
+		<div>
+			<center><img class="profile-picture" src="https://placehold.it/160x160" />
+			<span><h2>{{ user_instance.username }}</h2></span></center>
+		</div>
 	</div>
-	<div class="row">
+</div>
+{% if user_posts %}
+<div class="container" style="margin-top: 10px;">
+	<div class="vid-nav">
+		<a class="active" href="#">Newest Uploads First</a>
+		<a class="" href="#">Oldest Uploads First</a>
+		<a class="" href="#">Most Watched</a>
+	</div>
+
+	<div class="row" style="margin-top: 30px;">
 		{% for post in user_posts %}
 		<!-- VIDEO PREVIEW -->
-		<div class="col-sm-3"> 
-			<div class="thumbnail" style="border-style: none;">
+		<div class="col-sm-4 col-md-3"> 
+			<div class="thumbnail video-card" style="border-style: none;">
 				<!-- THUMBNAIL IMAGE -->
 	      		<a href="{% url 'watch_video' post.id %}"><img src='https://placeholdit.imgix.net/~text?txtsize=23&txt=250%C3%97140&w=254&h=140' alt="..." style="height: 140px; background-color: rgb(189, 195, 199)" /></a>
 	      		<!-- OTHER INFORMATION -->
@@ -19,13 +31,38 @@
 	        		<b><a href="{% url 'watch_video' post.id %}">{{ post.title }}</a></b>
 	        		<!-- VIDEO AUTHOR -->
 	        		<div><a href="{% url 'profile' post.author %}" style="color:black">{{ post.author }}</a></div>
-	        		<p>
-	        		{{ post.upload_duration }}<br>
-	        		Posted on: {{ post.publish_date }}</p>
 	      		</div>
 	      	</div>
 	    </div><!-- END OF VIDEO PREVIEW -->
 		{% endfor %}
 	</div>
 </div>
+{% else %}
+	<div class="container" style="margin-top:50px;">
+		<span style="color:grey; font-size:3em;">{{ user_instance.username }} has no video posts. :(</span>
+	</div>
+{% endif %}
+
+<style type="text/css">
+	.user-profile {
+		background-color: white;
+		padding-top: 20px;
+		padding-bottom: 10px;
+	}
+
+	.profile-picture {
+		width: 160px;
+		height: 160px;
+		border-radius: 160px;
+	}
+
+	.video-card {
+		box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+		transition: all 0.3s cubic-bezier(.25,.8,.25,1) !important;
+	}
+
+	.video-card:hover{
+		box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22) !important;
+	}
+</style>
 {% endblock content %}

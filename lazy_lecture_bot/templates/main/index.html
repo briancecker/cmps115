@@ -3,23 +3,25 @@
 {% block content %}
 {{block.super}}
 
-<div class="container">
-	<ul class="nav nav-tabs nav-justified">
-		<li class="active"><a href="#">Recent Public Videos</a></li>
-		{% if request.user.is_authenticated %}
-		<li><a href="/">My Subcriptions</a></li>
-		<li><a href="/">My Favorites</a></li>
-		{% endif %}
-	</ul>
-	<div class="row" style="margin-top: 30px;">
+<div class="container" style="padding-top: 30px;">
+
+	<div class="row">
+		<select name="choices" onsubmit="document.forms[0].submit()" >
+		    <option value="mostRecent">Most Recent</option>
+		    <option value="mostViewed" >Most Viewed</option>
+		    <option value="topRated" >Top Rated</option>
+		    <option value="trending" >Trending</option> 
+		</select>
+	</div>
+	<div class="row" style="padding-top: 30px;">
 		{% if not vp %}
 			WHOOPS THE DATABASE IS EMPTY!
 		{% endif %}
-		
+
 	    {% for v in vp %}
 		<!-- VIDEO PREVIEW -->
-		<div class="col-sm-3"> 
-			<div class="thumbnail" style="border-style: none;">
+		<div class="col-sm-4 col-md-3"> 
+			<div class="thumbnail video-card" style="border-style: none; ">
 				<!-- THUMBNAIL IMAGE -->
 	      		<a href="{% url 'watch_video' v.id %}"><img src='https://placeholdit.imgix.net/~text?txtsize=23&txt=250%C3%97140&w=254&h=140' alt="..." style="height: 140px; background-color: rgb(189, 195, 199)" /></a>
 	      		<!-- OTHER INFORMATION -->
@@ -28,13 +30,61 @@
 	        		<b><a href="{% url 'watch_video' v.id %}">{{ v.title }}</a></b>
 	        		<!-- VIDEO AUTHOR -->
 	        		<div><a href="{% url 'profile' v.author %}" style="color:black">{{ v.author }}</a></div>
-	        		<p>
-	        		{{ v.upload_duration }}<br>
-	        		Posted on: {{ v.publish_date }}</p>
 	      		</div>
 	      	</div>
 	    </div><!-- END OF VIDEO PREVIEW -->
 	    {% endfor %}
 	</div>
+
+	<style type="text/css">
+
+		.video-card {
+			box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+			transition: all 0.3s cubic-bezier(.25,.8,.25,1) !important;
+		}
+
+		.video-card:hover{
+			box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22) !important;
+		}
+
+		.vid-nav a {
+			color: #6C7A89;
+			width: 150px;
+			padding-bottom: 5px;
+			border-bottom: 3px solid #6C7A89;
+			display: inline-block;
+			margin-right: 15px;
+			transition: all 0.3s cubic-bezier(.25,.8,.25,1) !important;
+		}
+
+		.vid-nav a.active {
+			color: #F9690E;
+			font-weight: bold;
+			border-bottom: 5px solid #F9690E;
+			text-decoration: none;
+		}
+
+		.vid-nav a:hover {
+			color: black;
+			text-decoration: none;
+			border-bottom: 3px solid #F9BF3B;
+		}
+
+		.vid-nav a.active:hover {
+			cursor: default;
+			color: #F9690E;
+			font-weight: bold;
+			border-bottom: 5px solid #F9690E;
+		}
+	</style>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$(".vid-nav a").click(function() {
+				$(".vid-nav a").removeClass("active");
+				$(this).addClass("active");
+			});
+		});
+	</script>
 </div>
 {% endblock content %}
