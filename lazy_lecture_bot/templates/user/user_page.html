@@ -10,13 +10,15 @@
 		</div>
 	</div>
 </div>
+
 {% if user_posts %}
-<div class="container" style="margin-top: 10px;">
-	<div class="vid-nav">
-		<a class="active" href="#">Newest Uploads First</a>
-		<a class="" href="#">Oldest Uploads First</a>
-		<a class="" href="#">Most Watched</a>
-	</div>
+<div class="container" style="margin-top: 20px;">
+	<select name="choices" onsubmit="document.forms[0].submit()" >
+	    <option value="mostRecent">Most Recent</option>
+	    <option value="trending" >Oldest First</option> 
+	    <option value="mostViewed" >Most Viewed</option>
+	    <option value="topRated" >Top Rated</option>
+	</select>
 
 	<div class="row" style="margin-top: 30px;">
 		{% for post in user_posts %}
@@ -64,5 +66,6 @@
 	.video-card:hover{
 		box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22) !important;
 	}
+
 </style>
 {% endblock content %}

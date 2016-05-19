@@ -26,7 +26,7 @@
 			<div class="dropdown navbar-right">
 				{% if not request.user.is_authenticated and not "/login" in request.get_full_path %}
 				<!-- Appears when user is not authenticated-->
-				<button class="btn btn-primary dropdown-toggle a-dropdown-button" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sign In<span class="caret" style="margin-left:15px;"></span></button>
+				<button class="btn btn-primary dropdown-toggle a-dropdown-button" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Log In<span class="caret" style="margin-left:15px;"></span></button>
 				<div class="dropdown-menu dropdown-menu-right a-dropdown-menu" aria-labelledby="dropdownMenu">
 			        <div class="dropdown-item">
 			        	<div class="container-fluid">
@@ -42,22 +42,28 @@
 			        				<span class="bar"></span>
 			        				<label for="password">Password</label>
 			        			</div>
-			        			<button type="submit" class="btn btn-primary btn-md btn-block"><b>Log In</b></button>
+
+			        			<button type="submit" class="btn btn-primary btn-md btn-block" style="border-radius: 4px;"><b>Log In</b></button>
+			        			
 			        		</form>
+			        		<div><center>OR</center></div>
+			        		<div style="margin-top:10px"><a href="{% url 'signup' %}" class="btn btn-default btn-md btn-block" style="width:185px; margin-left:auto; margin-right: auto; border-radius:4px;">Sign Up</a></div>
 			        	</div>
 			        </div>
 			        <!--a class="dropdown-item" href="#">Another action</a-->
+			        
+
 			    </div>
 
 			    {% elif request.user.is_authenticated %}
 			    <!-- Appears when user is authenticated-->
-			    <a href="{% url 'upload' %}" class="btn" style="background-color: rgb(46, 204, 113); color:white; border-radius: 0px; margin-top:9px;"><b><i class="fa fa-upload" aria-hidden="true" style="color:white; margin-right:15px;"></i>UPLOAD</b></a>
+			    <a href="{% url 'upload' %}" class="btn upload-button" style="background-color: rgb(46, 204, 113); color:white; margin-top:9px;"><b><i class="fa fa-upload" aria-hidden="true" style="color:white; margin-right:15px;"></i>UPLOAD</b></a>
 
 			    <button class="btn btn-primary dropdown-toggle a-dropdown-button" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{user.username}}<span class="caret" style="margin-left:15px;"></span></button>
 			    <div class="dropdown-menu dropdown-menu-right a-dropdown-menu" aria-labelledby="dropdownMenu">
-			    	<a class="dropdown-item" href="{% url 'profile' user.username %}"><div class="auth-item"><i class="fa fa-user fa-fw" aria-hidden="true" style="margin-right:15px;"></i>My Profile</div></a>
-			        <a class="dropdown-item" href="/"><div class="auth-item"><i class="fa fa-cogs fa-fw" aria-hidden="true" style="margin-right:15px;"></i>Settings</div></a>
-			        <a class="dropdown-item" href="{% url 'logoff' %}?redirect={{request.path}}"><div class="auth-item"><i class="fa fa-sign-out fa-fw" aria-hidden="true" style="margin-right:15px;"></i>Logout</div></a>
+			    	<a class="dropdown-item dropdown-link" href="{% url 'profile' user.username %}"><div class="auth-item"><i class="fa fa-user fa-fw" aria-hidden="true" style="margin-right:15px;"></i>My Profile</div></a>
+			        <a class="dropdown-item dropdown-link" href="/"><div class="auth-item"><i class="fa fa-cogs fa-fw" aria-hidden="true" style="margin-right:15px;"></i>Settings</div></a>
+			        <a class="dropdown-item dropdown-link" href="{% url 'logoff' %}?redirect={{request.path}}"><div class="auth-item"><i class="fa fa-sign-out fa-fw" aria-hidden="true" style="margin-right:15px;"></i>Logout</div></a>
 			    </div>
 
 			    {% endif %}
@@ -93,10 +99,12 @@
 
 	<style type="text/css">
 		.main-nav {
-			background-color: #2C3E50;
+			background-color: #011627;
 		}
 		.navbar {
+			border-bottom: 0px;
 			background-color: #FFF;
+			box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
 		}
 
 		.navbar-brand {
@@ -113,14 +121,14 @@
 			transition: all 0.3s cubic-bezier(.25,.8,.25,1) !important;
 		}
 		.secondary-nav > a.active{
-			color: #F9690E;
+			color: #E71D36;
 			font-weight: bold;
 		}
 		.secondary-nav > a:hover {
 			color: #F9BF3B;
 		}
 		.secondary-nav > a.active:hover {
-			color: #F9690E;
+			color: #E71D36;
 		}
 		.secondary-nav > a > div {
 			
@@ -134,12 +142,13 @@
 
 		body {
 			margin-top: 100px;
-			background-color: #ecf0f1;
+			background-color: #eee;
 		}
 
 		.a-dropdown-button {
 			border-radius: 0px;
 			margin-top: 8px;
+			padding-left: 25px;
 		}
 
 		.a-dropdown-menu {
@@ -148,6 +157,8 @@
 			padding-top:  20px;
 			padding-bottom: 17px;
 			transition: all 0.3s cubic-bezier(.25,.8,.25,1) !important;
+			box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+			border: 0px;
 		}
 
 		.auth-item {
@@ -160,10 +171,15 @@
 
 		.dropdown-item {
 			color: #6C7A89;
+			
+		}
+
+		.dropdown-item.dropdown-link {
+			color: #6C7A89;
 			transition: all 0.3s cubic-bezier(.25,.8,.25,1) !important;
 		}
 
-		.dropdown-item:hover {
+		.dropdown-item.dropdown-link:hover {
 			text-decoration: none !important;
 			color: #F9BF3B;
 		}
@@ -195,7 +211,7 @@
 		  width:0;
 		  bottom:1px; 
 		  position:absolute;
-		  background:#5264AE; 
+		  background:#2EC4B6; 
 		  transition: all 0.3s cubic-bezier(.25,.8,.25,1) !important;
 		  -moz-transition:all 0.3s cubic-bezier(.25,.8,.25,1) !important;
 		  -webkit-transition:all 0.3s cubic-bezier(.25,.8,.25,1) !important;
@@ -226,7 +242,7 @@
 		.form-group input:focus ~ label , .form-group input:valid ~ label {
 		  top: -50px;
 		  font-size:12px;
-		  color:#5264AE;
+		  color:#2EC4B6;
 		}
 
 		.a-dropdown-menu button {
@@ -236,6 +252,18 @@
 
 		input:-webkit-autofill {
 			-webkit-box-shadow: 0 0 0 1000px white inset !important;
+		}
+
+		.upload-button {
+			margin-right: 15px;
+			padding-right: 15px !important;
+			padding-left: 15px !important;
+		}
+
+		.btn-primary {
+			background-color:#2EC4B6 !important;
+			border: 0px;
+			border-radius: 4px;
 		}
 	</style>
 	{% endblock content %}
