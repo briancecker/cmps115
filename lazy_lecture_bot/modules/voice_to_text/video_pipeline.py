@@ -145,9 +145,16 @@ class VideoPipeline:
         db_segments = store_segments(video, audio_segments)
 
         logger.info("transcribing {0} segments".format(len(db_segments)))
-        video.processing_status = "Transcribing Audio"
+        video.processing_status = "Transcribing Audio Chunk 1/{0}".format(len(db_segments))
         video.save()
-        transcripts = [self.audio_transcriber.transcribe(segment.audio_blob.get_blob()) for segment in db_segments]
+        transcripts = list()
+        for i, segment in enumerate(db_segments):
+            transcripts.append(self.audio_transcriber.transcribe(segment.audio_blob.get_blob()))
+            if i + 1 != len(db_segments):
+                video.processing_status = "Transcribing Audio Chunk {0}/{1}".format(i + 2, len(db_segments))
+                video.save()
+
+        # transcripts = [self.audio_transcriber.transcribe(segment.audio_blob.get_blob()) for segment in db_segments]
         store_transcripts(video, db_segments, transcripts)
 
         video.processing_status = ""
