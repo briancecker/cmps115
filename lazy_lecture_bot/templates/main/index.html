@@ -21,7 +21,10 @@
 		<div class="col-sm-3"> 
 			<div class="thumbnail" style="border-style: none;">
 				<!-- THUMBNAIL IMAGE -->
-	      		<a href="{% url 'watch_video' v.id %}"><img src='https://placeholdit.imgix.net/~text?txtsize=23&txt=250%C3%97140&w=254&h=140' alt="..." style="height: 140px; background-color: rgb(189, 195, 199)" /></a>
+	      		<a href="{% url 'watch_video' v.id %}">
+                    <img src='{{ v.thumb_url }}'
+                         alt="" style="height: 140px; background-color: rgb(189, 195, 199)" />
+                </a>
 	      		<!-- OTHER INFORMATION -->
 	      		<div class="caption" style="padding: 10px 0px 0px 0px;">
 	      			<!-- VIDEO TITLE -->

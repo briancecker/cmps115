@@ -7,7 +7,7 @@ from modules.blob_storage import blob_settings
 BUF_SIZE = 64000
 
 
-def store_bsr_data(data, extension="", file_prefix=""):
+def store_bsr_data(data, extension=None, file_prefix=""):
     """
     Store data into blob storage.
     Args:
@@ -18,7 +18,7 @@ def store_bsr_data(data, extension="", file_prefix=""):
     Returns: The BlobStorage entry in the database
 
     """
-    file_name = "blob/" + data_to_hashed_name(data, extension) + file_prefix
+    file_name = "blob/" + file_prefix + data_to_hashed_name(data, extension)
     blob_settings.boto3_client.put_object(Key=file_name, Body=data, Bucket=blob_settings.bucket_name, ACL="public-read")
 
     bs = BlobStorage(file_name=file_name)
@@ -52,7 +52,11 @@ def create_bsr_from_s3(file_name):
 
 
 def data_to_hashed_name(data, extension):
-    return hashlib.sha256(data).hexdigest() + "." + extension
+    hash_name = hashlib.sha256(data).hexdigest()
+    if extension is not None:
+        hash_name += "." + extension
+
+    return hash_name
 
 
 def file_to_hashed_name(file):
