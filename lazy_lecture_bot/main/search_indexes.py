@@ -1,5 +1,6 @@
 from haystack import indexes
 from main.models import Transcripts, Utterances, Videos
+from videoapp.models import VideoPost
 
 
 class transcriptIndex(indexes.SearchIndex, indexes.Indexable):
@@ -37,12 +38,20 @@ class UtteranceIndex(indexes.SearchIndex, indexes.Indexable):
 class VideoIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr="title")
-    video_id = indexes.IntegerField(model_attr="id")
+    description = indexes.CharField(model_attr="description")
+    author = indexes.CharField()
+    video_id = indexes.IntegerField()
 
     def get_model(self):
-        return Videos
+        return VideoPost
 
     def index_queryset(self, using=None):
         return self.get_model().objects.all()
+
+    def prepare_author(self, obj):
+        return obj.author.username
+
+    def prepare_video_id(self, obj):
+        return obj.upload.id
  
 
