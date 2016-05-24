@@ -73,7 +73,7 @@
 		
 		var status_checker = setInterval(function(){
 			$.ajax({
-				type: "GET",
+				type: "POST",
 				url: "/transcript_status/",
 				data: {"video_id": vid, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
 				success : function(data) {

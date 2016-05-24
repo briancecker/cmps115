@@ -4,27 +4,23 @@
 {{block.super}}
 
 <div class="container" style="padding-top: 30px;">
-
-	<div class="row">
-		<select name="filter" id="filter-select">
-		    <option value="mostRecent" selected>Most Recent</option>
-		    <option value="mostViewed" >Most Viewed</option>
-		    <option value="topRated" >Top Rated</option>
-		    <option value="trending" >Trending</option> 
-		</select>
-	</div>
 	<div style="margin-top:30px;">
 		<div class="row">
-			{% if not vp %}
-				WHOOPS THE DATABASE IS EMPTY!
-			{% endif %}
+			{% if query %}
+            <div style="margin-bottom:10px;">
+                Showing search results for <span style="font-style: italic">"{{ query }}"</span>
+            </div>
+            {% endif %}
 
 		    {% for v in vp %}
 			<!-- VIDEO PREVIEW -->
 			<div class="col-sm-4 col-md-3 nopadding"> 
 				<div class="thumbnail video-card" style="border-style: none; ">
 					<!-- THUMBNAIL IMAGE -->
-		      		<a href="{% url 'watch_video' v.id %}"><div class="img-container"><img src='https://placehold.it/300x169' alt="..."/ class="img-responsive"></div></a>
+		      		<a href="{% url 'watch_video' v.id %}">
+		      			<div class="img-container"><img class="img-responsive" src='{{ v.thumb_url }}'
+                         alt="" style="border-top-right-radius: 4px; border-top-left-radius: 4px;" /></div>
+		      		</a>
 		      		<!-- OTHER INFORMATION -->
 		      		<div class="caption">
 		      			<!-- VIDEO TITLE -->
@@ -36,6 +32,17 @@
 		    </div><!-- END OF VIDEO PREVIEW -->
 		    {% endfor %}
 		</div>
+		<div>
+	        <ul class="pagination">
+	            {% for page in pages %}
+	                {% if page == current_page %}
+	                    <li class="active"><a href="#" onClick="return false;">{{ page }}</a></li>
+	                {% else %}
+	                    <li><a href="{% url 'index' %}?{{ page_path }}&page={{ page }}">{{ page }}</a></li>
+	                {% endif %}
+	            {% endfor %}
+	        </ul>
+        </div>
 	</div>
 
 	<style type="text/css">
@@ -64,10 +71,6 @@
 			margin: 0px !important;
 			display: block;
 			object-fit: cover;
-		}
-
-		.eotl {
-			background-color: grey;
 		}
 	</style>
 

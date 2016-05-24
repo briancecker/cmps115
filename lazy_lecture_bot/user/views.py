@@ -25,9 +25,10 @@ def show_user(request, username="None"):
 			return redirect("login")
 
 	context = {
-			"user_posts" : user_posts,
+			"vp" : user_posts,
 			"user_instance" : user_instance,
 		}
+
 	return render(request, "user/user_page.html", context)
 
 """""""""""""""""""""

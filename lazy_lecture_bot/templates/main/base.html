@@ -22,6 +22,16 @@
 				<a class="navbar-brand" href='{% url "index" %}'>Lazy Lecture Bot</a>
 			</div><!--END of Navbar Header or Site Logo-->
 
+			<!-- SEARCH BAR -->
+			<div class="col-md-6" style="padding-left: 0px;">
+				<form class="navbar-form" role="search" method="GET" action="/">
+					<div class="form-group">
+						<input name="query" type="text" class="form-control"
+                               placeholder="What are you looking for?" style="width:400px" />
+						<button class="btn btn-default btn" type="submit">Search</button>
+					</div>
+				</form>
+			</div><!-- END OF SEARCH BAR -->
 
 			<div class="dropdown navbar-right">
 				{% if not request.user.is_authenticated and not "/login" in request.get_full_path %}
@@ -51,8 +61,6 @@
 			        	</div>
 			        </div>
 			        <!--a class="dropdown-item" href="#">Another action</a-->
-			        
-
 			    </div>
 
 			    {% elif request.user.is_authenticated %}
@@ -96,6 +104,7 @@
     		</div>
     	{% endfor %}
 	{% endif %}
+
 	<style type="text/css">
 		.main-nav {
 			background-color: #011627;
@@ -269,6 +278,7 @@
 
     {% load static %}
     <script src="{% static 'js/csrf_header.js' %}"></script>
+    <script src='https://cdn.ractivejs.org/latest/ractive.js'></script>
 	<!-- Latest compiled and minified JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 </body>

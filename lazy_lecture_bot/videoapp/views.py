@@ -24,8 +24,6 @@ from django.template.loader import render_to_string
     WATCH VIDEOS
 
 """""""""""""""""""""
-
-
 def watch_video_view(request, videopost_id):
     post = VideoPost.objects.get(pk=videopost_id)
     # data = serializers.serialize("json", Utterances.objects.all())
@@ -67,8 +65,6 @@ def get_transcript(video_object):
     UPLOAD VIDEO
 
 """""""""""""""""""""
-
-
 @csrf_protect
 def upload_view(request):
     form = VideoUploadForm()
@@ -93,7 +89,9 @@ def upload_view(request):
     }
     return render(request, "videoapp/upload.html", context)
 
-
+"""""
+method that helps with utterance search
+"""""
 @csrf_protect
 def search_utterances(request):
     if request.method == "POST":
@@ -114,10 +112,14 @@ def search_utterances(request):
             json.dumps({""}), content_type="application/json"
         )
 
+"""""
+method that returns the status of the transcript processing
+and returns the processesed transcript when finished.
+"""""
 @csrf_protect
 def ajax_transcript_status(request):
     if request.is_ajax():
-        v_id = request.GET.get("video_id")
+        v_id = request.POST.get("video_id")
         post = VideoPost.objects.get(pk=v_id)
         # data = serializers.serialize("json", Utterances.objects.all())
 
