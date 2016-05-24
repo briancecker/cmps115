@@ -21,8 +21,8 @@
         };
 
         req.onerror = req.onabort = function() {
-            disableSubmit(false)
-            error(el, 'Sorry, failed to upload file.')
+            disableSubmit(false);
+            // error(el, 'Sorry, failed to upload file.');
         };
 
         req.upload.onprogress = function(data) {

@@ -17,6 +17,7 @@ from modules.voice_to_text.watson.watson_video_pipeline import WatsonVideoPipeli
 from .forms import VideoUploadForm
 from .models import VideoPost
 from main.models import Segments, Transcripts, Utterances, Videos
+from django.template.loader import render_to_string
 
 """""""""""""""""""""
 
@@ -115,18 +116,20 @@ def search_utterances(request):
 
 @csrf_protect
 def ajax_transcript_status(request):
-    v_id = request.GET.get("video_id")
-    post = VideoPost.objects.get(pk=v_id)
-    upload = post.upload
+    if request.is_ajax():
+        v_id = request.GET.get("video_id")
+        post = VideoPost.objects.get(pk=v_id)
+        # data = serializers.serialize("json", Utterances.objects.all())
 
+        context = {
+            "post": post,
+            "transcript_data": get_transcript(post.upload),
+            "finished_processing": post.upload.finished_processing,
+            "processing_status": post.upload.processing_status,
+        }
 
-    return HttpResponse(
-        json.dumps({
-            "processing_status": upload.processing_status,
-            "finished_processing": upload.finished_processing
-        }), 
-        content_type="application/json"
-    )
+        html = render_to_string('videoapp/utterances.html',context)
+        return HttpResponse(html)
 
 """
 Helper Function that returns the duration of a video using the duration of its Segments

@@ -4,12 +4,16 @@ import wave
 
 import io
 import os
+from PIL import Image
+from django.test import TestCase
 from modules import file_utilities
+from modules.blob_storage import blob_storage
+from modules.video_processing import screenshotting
 from modules.video_processing.video_processing import new_audio_buffer, read_audio_segments_by_time, strip_audio, \
     get_audio_duration, fix_audio
 
 
-class VideoProcessingTest(unittest.TestCase):
+class VideoProcessingTest(TestCase):
     def setUp(self):
         with open(file_utilities.abs_resource_path(["test_videos", "cpp_example.mp4"]), 'rb') as fh:
             self.test_video = fh.read()
@@ -62,6 +66,13 @@ class VideoProcessingTest(unittest.TestCase):
     def test_get_audio_duration(self):
         duration = get_audio_duration(self.test_audio)
         self.assertLessEqual(duration - 235.937, 0.001)
+
+    def test_take_screenshot(self):
+        screenshot, rc = screenshotting.take_screenshot(self.test_video, (0, 0, 0), 250, 140)
+        self.assertEqual(rc, 0)
+        self.assertEqual(len(screenshot), 4177)
+        im = Image.open(io.BytesIO(screenshot))
+        self.assertEqual(im.size[0], 250)
 
 
 if __name__ == "__main__":

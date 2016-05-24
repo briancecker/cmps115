@@ -53,6 +53,12 @@ class Videos(models.Model):
         return self.video_id
 
 
+class Thumbnail(models.Model):
+    video = models.ForeignKey("Videos")
+    image_blob = models.ForeignKey("BlobStorage")
+    time = models.FloatField()
+
+
 class Segments(models.Model):
     video_id = models.ForeignKey("Videos")
     segment_index = models.IntegerField()

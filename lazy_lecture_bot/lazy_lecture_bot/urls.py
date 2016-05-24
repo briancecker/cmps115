@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-
+from lazy_lecture_bot import initial_data_loading
 from user import views as user_views
 from videoapp import views as video_views
 from haystack.views import SearchView
@@ -36,3 +36,11 @@ urlpatterns = [
     url(r'^search/', SearchView('search/search.html'), name='haystack_search'),
     url(r'^transcript_status/', video_views.ajax_transcript_status, name='transcript_status')
 ]
+
+
+# urls.py is only ever loaded once, so it's a good place for one-off startup loading
+def startup():
+    initial_data_loading.import_data()
+
+
+startup()

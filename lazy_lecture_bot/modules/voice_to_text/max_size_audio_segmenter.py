@@ -24,14 +24,13 @@ class MaxSizeAudioSegmenter(AudioSegmenter):
 
     def segment(self, audio):
         params = get_audio_params(audio)
-        print(params)
         # Get base size of an empty bytes object
         empty_bytes_size = sys.getsizeof(b'')
         # Calculate the size of each frame:
         # the number of channels * the number of bytes to represent each channel
         bytes_per_frame = params["nchannels"] * params["sampwidth"]
         # Calculate the target number of frames for each segment
-        n_frames = self.max_size - empty_bytes_size // bytes_per_frame
+        n_frames = (self.max_size - empty_bytes_size) // bytes_per_frame
 
         results = list()
         for segment in read_audio_frames(audio, n_frames):

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>{% block title %}Lazy Lecture Bot{% endblock title %}</title>
+	
+	{% block head %}
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+	{% load staticfiles %}
+	<link rel="stylesheet" type="text/css" href="{% static 'css/main_style.css' %}">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+	<script src="https://use.fontawesome.com/e900c63c6f.js"></script>
+	 {% endblock head %}
+</head>
+
+<body>
+	<div style="margin-top:70px;">
+		{% block content %}
+		<!-- NAVIGATION BAR -->
+		<nav class="navbar navbar-default navbar-fixed-top container-fluid" style="padding-right:15px; margin-bottom: 0px;"> 
+			<div class="col-md-9">
+				<div class="col-md-3 navbar-header">
+					<a class="navbar-brand" href='{% url "index" %}'><b>Lazy Lecture Bot</b></a>
+				</div>
+				<!-- SEARCH BAR -->
+				<div class="col-md-9" style="padding-left: 0px;">
+					<form class="navbar-form" role="search">
+						<div class="form-group search-form">
+							<input type="text" class="form-control universal-search-bar" placeholder="What are you looking for?" style="width:500px"></input>
+							<button class="btn btn-default btn universal-search-button" type="button"><i class="fa fa-search" aria-hidden="true"></i></button>
+						</div>
+					</form><!-- END OF SEARCH BAR -->
+				</div>
+			</div>
+
+			<!-- RIGHT NAVBAR ELEMENTS -->
+			<div class="col-md-3" style="padding-right: 0px;">
+				<div class="collapse navbar-collapse">
+					<ul class="nav navbar-nav navbar-right">
+						{% if not request.user.is_authenticated and not "/login" in request.get_full_path %}
+						<!--SIGN IN DROPDOWN-->
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-sign-in" aria-hidden="true" style="margin-right: 15px;"></i>Log In <span class="caret"></span></a>
+							<ul class="dropdown-menu">
+								<li>
+									<div class="container-fluid">
+										<form class="navbar-form" method="POST" action="{% url 'auth_login' %}?redirect={{request.path}}">
+										{% csrf_token %}
+											<div class="form-group" style="margin-top:15px">
+												<label>Username</label>
+												<input type="text" class="form-control" name="username" placeholder="Username" />
+											</div>
+											<div class="form-group" style="margin-top: 15px">
+												<label>Password:</label>
+												<input type="password" class="form-control" name="password" placeholder="Password" />
+											</div>
+											<button type="submit" class="btn btn-primary btn-md btn-block" style="margin-top: 15px; margin-bottom: 15px"><b>Log In</b></button>
+										</form>
+									</div>
+								</li>
+								<li><div class="container-fluid" style="margin-bottom: 15px"><a href="{% url 'signup' %}" class="btn btn-default" style="margin-left: 15px; padding-left: 70px; padding-right: 75px;"><b>Sign Up</b></a></div></li>
+							</ul>
+						</li>
+						{% elif request.user.is_authenticated %}
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span>{{user.username}}</span>  <span class="caret"></span></a>
+							<ul class="dropdown-menu">
+								<li><a href="{% url 'profile' user.username %}"><i class="fa fa-user fa-fw" aria-hidden="true" style="margin-right:15px;"></i>My Profile</a></li>
+								<li><a href="/"><i class="fa fa-cogs fa-fw" aria-hidden="true" style="margin-right:15px;"></i>Settings</a></li>
+								<li><a href="{% url 'logoff' %}?redirect={{request.path}}"><i class="fa fa-sign-out fa-fw" aria-hidden="true" style="margin-right:15px;"></i>Log Off</a></li>
+							</ul>
+						</li>
+						<li><a href="{% url 'upload' %}" class="btn" style="background-color: rgb(46, 204, 113); color:white; border-radius: 0px"><b><i class="fa fa-upload" aria-hidden="true" style="color:white; margin-right:15px;"></i>UPLOAD</b></a></li>
+						{% endif %}
+					</ul>
+				</div>
+			</div>
+
+			<div class="row">
+				<div>This is a second navigation bar</div>
+			</div>
+		</nav> <!--END OF NAVIGATION BAR -->
+		{% if messages %}
+			{% for message in messages %}
+				<div class="container">
+	        		<div class="alert alert-{{message.tags}} fade in" role="alert" >
+	        			<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+	        			<strong>{{ message }}</strong>
+	        		</div>
+        		</div>
+        	{% endfor %}
+		{% endif %}
+
+		{% endblock content %}
+	</div>
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+</body>
+</html>
+

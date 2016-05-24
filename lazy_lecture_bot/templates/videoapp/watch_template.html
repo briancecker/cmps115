@@ -23,9 +23,10 @@
 		</div>
 
 		<div class="col-md-3 transcript">
-			<div><h3>Transcript:</h3></div>
+			<div style="margin-left:10px;"><h4>Transcript:</h4></div>
+			<center><i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw loading-spinner"></i></center>
 			<div class="utterance-container" style="overflow: auto; height: 700px" status="{{ processing_status }}" finished="{{ finished_processing }}" vid="{{ video_id }}">
-				<div class="transcript-data">
+				<!--div class="transcript-data">
 					{% if not finished_processing %}
 						<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
 						<div class="processing_status">{{ processing_status }}...</div>
@@ -56,7 +57,7 @@
 							{%endfor%}
 						</dl>
 					{% endif %}
-				</div>
+				</div>-->
 			</div>
 		</div>
 
@@ -69,20 +70,23 @@
 		status = $(".utterance-container").attr("status");
 		vid = $(".utterance-container").attr("vid");
 		
-		/*
+		
 		var status_checker = setInterval(function(){
-			$.get("/transcript_status/", {video_id: vid}, function( json ) {
-				//var obj = JSON.parse(json);
-				finished = json["finished_processing"];
-				status = json["processing_status"];
-				if(finished == "True" || finished == "true") {
-					clearInterval(status_checker);
-				} else {
-					$(".processing_status").html(status);
-				}
+			$.ajax({
+				type: "GET",
+				url: "/transcript_status/",
+				data: {"video_id": vid, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+				success : function(data) {
+					$(".utterance-container").html(data);
+					finished = $(".transcript-data").attr("finished");
+				},
 			});
-		}, 5000);
-		*/
+			if(finished == "True" || finished == "true") { 
+				clearInterval(status_checker); 
+				$(".loading-spinner").remove();
+			}
+		}, 500);
+		
 		/*
 		 * Popcorn timing - links behaviors to times in the video
 		 */
