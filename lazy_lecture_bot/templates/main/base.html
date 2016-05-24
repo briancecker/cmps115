@@ -22,10 +22,11 @@
 				</div>
 				<!-- SEARCH BAR -->
 				<div class="col-md-9" style="padding-left: 0px;">
-					<form class="navbar-form" role="search">
+					<form class="navbar-form" role="search" method="GET" action="/">
 						<div class="form-group">
-							<input type="text" class="form-control" placeholder="What are you looking for?" style="width:500px"></input>
-							<button class="btn btn-default btn" type="button">Search</button>
+							<input name="query" type="text" class="form-control"
+                                   placeholder="What are you looking for?" style="width:500px" />
+							<button class="btn btn-default btn" type="submit">Search</button>
 						</div>
 					</form><!-- END OF SEARCH BAR -->
 				</div>
@@ -91,6 +92,7 @@
 
     {% load static %}
     <script src="{% static 'js/csrf_header.js' %}"></script>
+    <script src='https://cdn.ractivejs.org/latest/ractive.js'></script>
 	<!-- Latest compiled and minified JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 </body>

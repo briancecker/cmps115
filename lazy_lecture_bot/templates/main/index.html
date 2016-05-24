@@ -12,10 +12,11 @@
 		{% endif %}
 	</ul>
 	<div class="row" style="margin-top: 30px;">
-		{% if not vp %}
-			WHOOPS THE DATABASE IS EMPTY!
-		{% endif %}
-		
+        {% if query %}
+            <div>
+                Showing search results for <span style="font-style: italic">"{{ query }}"</span>
+            </div>
+        {% endif %}
 	    {% for v in vp %}
 		<!-- VIDEO PREVIEW -->
 		<div class="col-sm-3"> 
@@ -39,5 +40,16 @@
 	    </div><!-- END OF VIDEO PREVIEW -->
 	    {% endfor %}
 	</div>
+    <div>
+        <ul class="pagination">
+            {% for page in pages %}
+                {% if page == current_page %}
+                    <li class="active"><a href="#" onClick="return false;">{{ page }}</a></li>
+                {% else %}
+                    <li><a href="{% url 'index' %}?{{ page_path }}&page={{ page }}">{{ page }}</a></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
 </div>
 {% endblock content %}

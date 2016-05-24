@@ -1,1 +1,3 @@
-{{ object.text }}
+{{ object.title }}
+{{ object.description }}
+{{ object.author }}
