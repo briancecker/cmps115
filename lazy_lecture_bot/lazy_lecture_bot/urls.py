@@ -15,10 +15,10 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from django.conf import settings
 
 from user import views as user_views
 from videoapp import views as video_views
+from haystack.views import SearchView
 
 urlpatterns = [
     # map sends the default index page to be mapped by the main app
@@ -31,5 +31,8 @@ urlpatterns = [
     url(r'^login/auth_login/$', user_views.auth_login, name="auth_login"),
     url(r'^watch/', include('videoapp.urls'), name="video_watch"),
     url(r'^upload/', video_views.upload_view, name="upload"),
+    url(r'^search_utterances/', video_views.search_utterances, name="search_utterances"),
     url(r'^s3direct/', include('s3direct.urls')),
+    url(r'^search/', SearchView('search/search.html'), name='haystack_search'),
+    url(r'^transcript_status/', video_views.ajax_transcript_status, name='transcript_status')
 ]

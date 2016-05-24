@@ -3,9 +3,10 @@ from django.shortcuts import render
 from videoapp.models import VideoPost
 
 def index(request):
+	video_list = VideoPost.objects.filter(public_access=True).order_by('publish_date')
+
 	context = {
-		"vp" : VideoPost.objects.filter(public_access=True).order_by('publish_date'),
+		"video_list" : video_list,
 		"user" : request.user,
-		"n" : range(15), # USED FOR TESTING
 	}
 	return render(request, 'main/index.html', context)
