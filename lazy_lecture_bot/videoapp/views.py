@@ -125,6 +125,7 @@ def ajax_transcript_status(request):
         # data = serializers.serialize("json", Utterances.objects.all())
 
         context = {
+            "video_id": v_id,
             "post": post,
             "transcript_data": get_transcript(post.upload),
             "finished_processing": post.upload.finished_processing,
@@ -132,7 +133,6 @@ def ajax_transcript_status(request):
         }
 
         html = render_to_string('videoapp/utterances.html',context, request=request)
-        #html = render('videoapp/utterances.html',context, RequestContext(request))
         return HttpResponse(html)
 
 """
