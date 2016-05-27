@@ -18,6 +18,7 @@ from .forms import VideoUploadForm
 from .models import VideoPost
 from main.models import Segments, Transcripts, Utterances, Videos
 from django.template.loader import render_to_string
+from django.template import RequestContext
 
 """""""""""""""""""""
 
@@ -130,7 +131,8 @@ def ajax_transcript_status(request):
             "processing_status": post.upload.processing_status,
         }
 
-        html = render_to_string('videoapp/utterances.html',context)
+        html = render_to_string('videoapp/utterances.html',context, request=request)
+        #html = render('videoapp/utterances.html',context, RequestContext(request))
         return HttpResponse(html)
 
 """
