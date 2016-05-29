@@ -1,5 +1,3 @@
-import sys
-
 import dj_database_url
 from django.utils.crypto import get_random_string
 from .base import *
@@ -9,8 +7,6 @@ DEBUG = False
 DATABASES = {
     'default': dj_database_url.config(conn_max_age=500),
 }
-
-BLOB_STORAGE_TYPE = "s3"
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', "fierce-plains-23392.herokuapp.com"]
 
