@@ -25,40 +25,13 @@
 
 		<div class="col-md-3 transcript">
 			<div style="margin-left:10px;"><h4>Transcript:</h4></div>
-			<center><i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw loading-spinner"></i></center>
-			<div class="utterance-container" style="overflow: auto; height: 700px" status="{{ processing_status }}" finished="{{ finished_processing }}" vid="{{ video_id }}">
-				<!--div class="transcript-data">
-					{% if not finished_processing %}
-						<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
-						<div class="processing_status">{{ processing_status }}...</div>
-					{% else %}
-		                <div class="utterance-search">
-		                    <form class="utterance-form" method="POST" action="/search_utterances/" style="width: 100%">
-		                        {% csrf_token %}
-		                        <input name="video-id" type="hidden" value="{{ video_id }}" />
-		                        <div class="form-group input-group" style="width: 100%">
-		                            <input name="query" type="text" class="form-control" autocomplete="off"
-		                                   placeholder="Type to Filter Utterances" />
-		                        </div>
-		                    </form>
-		                </div>
-						<dl class="dl-horizontal">
-							{% for transcript in transcript_data %}
-								{% for utterance in transcript.utterances %}
-									<div class="utterance" 
-											id="{{utterance.id}}"
-											data-utterance-id="{{utterance.id}}"
-											onclick="goToVideoTime( {{ utterance.start_time }} );" 
-											startTime="{{ utterance.start_time }}" endTime="{{ utterance.end_time }}">
-										<dt>{{ utterance.start_time }} - {{ utterance.end_time }}
-											<dd>{{ utterance.text }}</dd>
-										</dt>
-									</div>
-								{% endfor %}
-							{%endfor%}
-						</dl>
-					{% endif %}
-				</div>-->
+			<div style="text-align: center">
+                <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw loading-spinner"></i>
+            </div>
+			<div class="utterance-container" style="overflow: auto; height: 700px"
+                 status="{{ processing_status }}"
+                 finished="{{ finished_processing }}"
+                 vid="{{ video_id }}">
 			</div>
 		</div>
 
@@ -117,7 +90,6 @@
 	            success: function(json) {
 	                var utterance_ids = new Set(json["utterance_ids"]);
 	                $(".utterance").each(function() {
-	                    console.log("utterance: " + $(this).data("utterance-id"));
 	                    if (!utterance_ids.has(parseInt($(this).data("utterance-id")))) {
 	                        // utterance is not in the searched set, hide it
 	                        $(this).slideUp();

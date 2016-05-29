@@ -1,7 +1,7 @@
 import logging
 
 from abc import ABCMeta
-from main.models import Segments, Transcripts, Utterances, Tokens, Thumbnail, BlobStorage
+from main.models import Segments, Transcripts, Utterances, Tokens, Thumbnail
 from modules.blob_storage.blob_storage import store_bsr_data
 from modules.video_processing import video_processing
 from modules.video_processing.screenshotting import take_screenshot

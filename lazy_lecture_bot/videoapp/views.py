@@ -1,24 +1,15 @@
 import json
 import time
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
+
 from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
-from haystack.query import SearchQuerySet
-from modules.voice_to_text import async_tasks
-from modules.voice_to_text.async_tasks import queue_vp_request
-from user.forms import *
+from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_protect
-from django.conf import settings
-from django.core import serializers
-from modules.voice_to_text.watson.watson_video_pipeline import WatsonVideoPipeline
+from haystack.query import SearchQuerySet
+from main.models import Segments, Transcripts, Utterances, Videos
+from modules.voice_to_text.async_tasks import queue_vp_request
 from .forms import VideoUploadForm
 from .models import VideoPost
-from main.models import Segments, Transcripts, Utterances, Videos
-from django.template.loader import render_to_string
-from django.template import RequestContext
 
 """""""""""""""""""""
 

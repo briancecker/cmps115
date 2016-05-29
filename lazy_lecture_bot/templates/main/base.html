@@ -7,7 +7,6 @@
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 	{% load staticfiles %}
-	<!--link rel="stylesheet" type="text/css" href="{% static 'css/main_style.css' %}"-->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
 	<script src="https://use.fontawesome.com/e900c63c6f.js"></script>
 	{% endblock head %}
@@ -60,7 +59,6 @@
 			        		<div style="margin-top:10px"><a href="{% url 'signup' %}" class="btn btn-default btn-md btn-block" style="width:185px; margin-left:auto; margin-right: auto; border-radius:4px;">Sign Up</a></div>
 			        	</div>
 			        </div>
-			        <!--a class="dropdown-item" href="#">Another action</a-->
 			    </div>
 
 			    {% elif request.user.is_authenticated %}
