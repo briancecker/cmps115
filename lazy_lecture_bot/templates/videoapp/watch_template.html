@@ -2,66 +2,77 @@
 {% block title %}{{ post.title }} | {{ block.super }}{% endblock title %}
 {% block content %}
 {{block.super}}
-<div class="container">
-	<script src="http://popcornjs.org/code/dist/popcorn-complete.js"></script>
+<script src="http://popcornjs.org/code/dist/popcorn-complete.js"></script>
+<div class="container-fluid" style="padding-top:30px;">
 	<div class="row">
-		<div class="col-md-7">
-			<video id="feature" width=640 height=360 controls>
-				<source src="{{video_url}}" type="video/mp4">
-				<source src="{{video_url}}" type="video/ogg">
-				Your browser does not support this video tag
-			</video>
-			<div><h1>{{ post.title }}</h1></div>
-			<div><a href="{% url 'profile' post.author %}">{{ post.author }}</a></div>
-			<div>posted on {{ post.publish_date }}</div>
-			<div style="overflow: auto; height: 300px;">{{ post.description }}</div>
-		</div>
+		<div class="col-md-6 col-md-offset-2 video-container">
+			<div class="embed-responsive embed-responsive-16by9">
+				<video id="feature" width=750 height=422 controls>
+					<source src="{{video_url}}" type="video/mp4">
+					<source src="{{video_url}}" type="video/ogg">
+					Your browser does not support this video tag
+				</video>
+			</div>
 
-		<dl class="col-md-5">
-			<div><h3>Transcript:</h3></div>
-            {% if finished_processing %}
-                <div class="utterance-search">
-                    <form class="utterance-form" method="POST" action="/search_utterances/" style="width: 100%">
-                        {% csrf_token %}
-                        <input name="video-id" type="hidden" value="{{ video_id }}" />
-                        <div class="form-group input-group" style="width: 100%">
-                            <input name="query" type="text" class="form-control" autocomplete="off"
-                                   placeholder="Type to Filter Utterances" />
-                        </div>
-                    </form>
-                </div>
-            {% endif %}
-			<div style="overflow: auto; height: 780px">
-			{% if not finished_processing %}
-				<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
-				{{ processing_status }}...
-			{% else %}
-				<dl class="dl-horizontal">
-					{% for transcript in transcript_data %}
-						{% for utterance in transcript.utterances %}
-							<div class="utterance"
-                                 data-utterance-id="{{ utterance.id }}"
-                                 id="utterance_{{ utterance.id }}"
-                                 onclick="goToVideoTime( {{ utterance.start_time }} );"
-                                 startTime="{{ utterance.start_time }}"
-                                 endTime="{{ utterance.end_time }}">
-								<dt>{{ utterance.start_time }} - {{ utterance.end_time }}
-									<dd>{{ utterance.text }}</dd>
-								</dt>
-							</div>
-						{% endfor %}
-					{%endfor%}
-				</dl>
-			{% endif %}
+			<div class="video-metadata">
+				<div><h1>{{ post.title }}</h1></div>
+				<div><a href="{% url 'profile' post.author %}">{{ post.author }}</a></div>
+				<div>posted on {{ post.publish_date }}</div>
+				<div style="overflow: auto; height: 50px;">{{ post.description }}</div>
 			</div>
 		</div>
+
+		<div class="col-md-3 transcript">
+			<div style="margin-left:10px;"><h4>Transcript:</h4></div>
+			<center><i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw loading-spinner"></i></center>
+			<div class="utterance-container" style="overflow: auto; height: 700px" status="{{ processing_status }}" finished="{{ finished_processing }}" vid="{{ video_id }}">
+				<!--div class="transcript-data">
+					{% if not finished_processing %}
+						<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
+						<div class="processing_status">{{ processing_status }}...</div>
+					{% else %}
+		                <div class="utterance-search">
+		                    <form class="utterance-form" method="POST" action="/search_utterances/" style="width: 100%">
+		                        {% csrf_token %}
+		                        <input name="video-id" type="hidden" value="{{ video_id }}" />
+		                        <div class="form-group input-group" style="width: 100%">
+		                            <input name="query" type="text" class="form-control" autocomplete="off"
+		                                   placeholder="Type to Filter Utterances" />
+		                        </div>
+		                    </form>
+		                </div>
+						<dl class="dl-horizontal">
+							{% for transcript in transcript_data %}
+								{% for utterance in transcript.utterances %}
+									<div class="utterance" 
+											id="{{utterance.id}}"
+											data-utterance-id="{{utterance.id}}"
+											onclick="goToVideoTime( {{ utterance.start_time }} );" 
+											startTime="{{ utterance.start_time }}" endTime="{{ utterance.end_time }}">
+										<dt>{{ utterance.start_time }} - {{ utterance.end_time }}
+											<dd>{{ utterance.text }}</dd>
+										</dt>
+									</div>
+								{% endfor %}
+							{%endfor%}
+						</dl>
+					{% endif %}
+				</div>-->
+			</div>
+		</div>
+
 	</div>
 </div>
 
 <script type="text/javascript">
-	$(document).ready(function() {
+	// This is the function that is called after the ajax called
+	function afterAjax() {
+		/*
+		 * POPCORN TIMING - links behaviors to times in the video
+		 */
 		var video = Popcorn('video');
 
+		// For each utterance set a Popcorn timing instance
 		$('.utterance').each(function(index) {
 			startTime = $(this).attr("startTime");
 			endTime = $(this).attr("endTime");
@@ -80,57 +91,86 @@
 			});
 		});
 
-		function beginLine(num) {
-			var $currentLine = $(".utterance:eq("+num+")");
-			$currentLine.addClass("highlight");
-		}
-		function endLine() {
-			$(".utterance").removeClass("highlight");
-		}
-	});
 
+		/*/////////////////////////////////////////////////////////
+		 * UTTERANCE SEARCH 
+		 */////////////////////////////////////////////////////////
+	    var $utterance_form = $(".utterance-form");
+	    var $query_input = $utterance_form.find("input[name='query']");
+	    var video_id = $utterance_form.find("input[name='video-id']").val();
+
+	    $utterance_form.on("submit", function(event) {
+	        event.preventDefault();
+	    });
+
+	    $query_input.on("input", function(event) {
+	        event.preventDefault();
+	        $.ajax({
+	            url: "/search_utterances/",
+	            type: "POST",
+	            data : {
+	                "video_id": video_id,
+	                "query": $query_input.val(),
+	            },
+
+	            success: function(json) {
+	                var utterance_ids = new Set(json["utterance_ids"]);
+	                $(".utterance").each(function() {
+	                    console.log("utterance: " + $(this).data("utterance-id"));
+	                    if (!utterance_ids.has(parseInt($(this).data("utterance-id")))) {
+	                        // utterance is not in the searched set, hide it
+	                        $(this).slideUp();
+	                    } else {
+	                        // utterance is in the searched set, show it
+	                        $(this).slideDown();
+	                    }
+	                });
+	            },
+
+	            error: function(xhr, errmsg, err) {
+
+	            }
+	        });
+        });	    	
+	}
+
+
+	// Adds a highlight class to the utterance
+	function beginLine(num) {
+		var $currentLine = $(".utterance:eq("+num+")");
+		$currentLine.addClass("highlight");
+	}
+
+	// Removes a highlight class to the utterance
+	function endLine() {
+		$(".utterance").removeClass("highlight");
+	}
 	function goToVideoTime(start_time) {
 		var video = document.getElementById("feature");
 		video.currentTime = start_time;
 	}
 
-    var $utterance_form = $(".utterance-form");
-    var $query_input = $utterance_form.find("input[name='query']");
-    var video_id = $utterance_form.find("input[name='video-id']").val();
-
-    $utterance_form.on("submit", function(event) {
-        event.preventDefault();
-    });
-
-    $query_input.on("input", function(event) {
-        event.preventDefault();
-        $.ajax({
-            url: "/search_utterances/",
-            type: "POST",
-            data : {
-                "video_id": video_id,
-                "query": $query_input.val(),
-            },
-
-            success: function(json) {
-                var utterance_ids = new Set(json["utterance_ids"]);
-                $(".utterance").each(function() {
-                    console.log("utterance: " + $(this).data("utterance-id"));
-                    if (!utterance_ids.has(parseInt($(this).data("utterance-id")))) {
-                        // utterance is not in the searched set, hide it
-                        $(this).slideUp();
-                    } else {
-                        // utterance is in the searched set, show it
-                        $(this).slideDown();
-                    }
-                });
-            },
-
-            error: function(xhr, errmsg, err) {
-
-            }
-        });
-
+	$(document).ready(function() {
+		finished = $(".utterance-container").attr("finished");
+		status = $(".utterance-container").attr("status");
+		vid = $(".utterance-container").attr("vid");
+		
+		var status_checker = setInterval(function(){
+			$.ajax({
+				type: "POST",
+				url: "/transcript_status/",
+				data: {"video_id": vid, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+				success : function(data) {
+					$(".utterance-container").html(data);
+					finished = $(".transcript-data").attr("finished");
+					afterAjax();
+				},
+			});
+			if(finished == "True" || finished == "true") { 
+				clearInterval(status_checker); 
+				$(".loading-spinner").remove();
+			}
+		}, 500);
     });
 </script>
 
@@ -139,6 +179,8 @@
 		color: #999;
 		padding-top: 10px;
 		padding-bottom: 10px;
+		padding-left: 10px;
+		padding-right: 10px;
 		border-top: 1px solid rgba(0,0,0,0.2);
 	}
 
@@ -149,6 +191,32 @@
 
 	.highlight {
 		color: black;
+		font-weight: bold;
+	}
+
+	.transcript {
+		background-color: white;
+		padding-left: 0px !important;
+		padding-right: 0px !important;
+		box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+	}
+
+	.transcript > div h3 {
+		padding-left: 10px !important;
+	}
+
+	.video-metadata {
+		background-color: white;
+		padding: 10px 10px 10px 10px;
+		margin-top: 10px;
+	}
+
+	.video-container {
+		box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+		padding-left: 0px;
+		padding-right: 0px;
+		background-color: white;
+		margin-right: 25px;
 	}
 </style>
 

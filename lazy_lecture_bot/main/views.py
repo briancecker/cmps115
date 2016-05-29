@@ -10,9 +10,12 @@ from videoapp.models import VideoPost
 
 
 def index(request):
+
     # Get params or their defaults
-    query = request.GET.get("query", None)
+    
     order = request.GET.get("order", "publish_date")
+    query = request.GET.get("query", None)
+    
     try:
         # These casts might throw exceptions, so put them inside the try
         page_num = int(request.GET.get("page", "1"))

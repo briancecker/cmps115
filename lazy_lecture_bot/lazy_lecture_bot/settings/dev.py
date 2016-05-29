@@ -1,7 +1,6 @@
 from .base import *
 
 DEBUG = True
-
 # Celery configuration
 INSTALLED_APPS.append("kombu.transport.django")
 BROKER_URL = "django://"

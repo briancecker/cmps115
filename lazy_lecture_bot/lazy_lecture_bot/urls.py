@@ -33,7 +33,8 @@ urlpatterns = [
     url(r'^upload/', video_views.upload_view, name="upload"),
     url(r'^search_utterances/', video_views.search_utterances, name="search_utterances"),
     url(r'^s3direct/', include('s3direct.urls')),
-    url(r'^search/', SearchView('search/search.html'), name='haystack_search')
+    url(r'^search/', SearchView('search/search.html'), name='haystack_search'),
+    url(r'^transcript_status/', video_views.ajax_transcript_status, name='transcript_status')
 ]
 
 
