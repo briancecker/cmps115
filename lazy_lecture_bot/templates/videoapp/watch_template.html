@@ -2,7 +2,8 @@
 {% block title %}{{ post.title }} | {{ block.super }}{% endblock title %}
 {% block content %}
 {{block.super}}
-<script src="http://popcornjs.org/code/dist/popcorn-complete.js"></script>
+{% load static %}
+<script src="{% static 'js/popcorn-complete.min.js' %}"></script>
 <div class="container-fluid" style="padding-top:30px;">
 	<div class="row">
 		<div class="col-md-6 col-md-offset-2 video-container">
