@@ -45,7 +45,7 @@ class Videos(models.Model):
     user_id = models.IntegerField()
     # user_id = models.ForeignKey()  # this still needs a path to link to blob_storage user_ID
     finished_processing = models.BooleanField()
-    processing_status = models.CharField(max_length=20)
+    processing_status = models.CharField(max_length=50)
     pipeline_type = models.ForeignKey("PipelineTypes")
     video_duration = models.FloatField(default=-1.0)
 
