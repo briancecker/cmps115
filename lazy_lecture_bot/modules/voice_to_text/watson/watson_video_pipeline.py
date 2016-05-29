@@ -6,5 +6,5 @@ from modules.voice_to_text.watson.watson_audio_transcriber import WatsonAudioTra
 class WatsonVideoPipeline(VideoPipeline):
     def __init__(self):
         super().__init__()
-        self.audio_segmenter = MaxSizeAudioSegmenter(max_size=95)
+        self.audio_segmenter = MaxSizeAudioSegmenter(max_size=10)
         self.audio_transcriber = WatsonAudioTranscriber()

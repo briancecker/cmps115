@@ -1,10 +1,87 @@
 {% extends "main/base.html" %}
-{% block title %}{{user_instance.username}} | {{block.super}}{% endblock title %}
+{% block title %}{{ user_instance.username }} | {{ block.super }}{% endblock title %}
 {% block content %}
 {{block.super}}
-<h1><a href='{% url "profile" username=user_instance.username %}'>{{user_instance.username}}</a></h1>
-<div>
-	{{user_instance.username}}'s videos
-	<div>None</div>
+<div class="container-fluid user-profile" style="padding-top:20px;">
+	<div class="row">
+		<div>
+			<center><img class="profile-picture" src="https://placehold.it/160x160" />
+			<span><h2>{{ user_instance.username }}</h2></span></center>
+		</div>
+	</div>
 </div>
+
+{% if vp %}
+<div class="container" style="margin-top: 20px;">
+
+	<div class="row" style="margin-top: 30px;">
+		{% for v in vp %}
+			<!-- VIDEO PREVIEW -->
+			<div class="col-sm-4 col-md-3 nopadding"> 
+				<div class="thumbnail video-card" style="border-style: none; ">
+					<!-- THUMBNAIL IMAGE -->
+		      		<a href="{% url 'watch_video' v.id %}">
+		      			<div class="img-container"><img class="img-responsive" src='{{ v.thumb_url }}'
+	                     alt="" style="border-top-right-radius: 4px; border-top-left-radius: 4px;" /></div>
+		      		</a>
+		      		<!-- OTHER INFORMATION -->
+		      		<div class="caption">
+		      			<!-- VIDEO TITLE -->
+		        		<b><a href="{% url 'watch_video' v.id %}">{{ v.title }}</a></b>
+		        		<!-- VIDEO AUTHOR -->
+		        		<div><a href="{% url 'profile' v.author %}" style="color:black">{{ v.author }}</a></div>
+		      		</div>
+		      	</div>
+		    </div><!-- END OF VIDEO PREVIEW -->
+		{% endfor %}
+	</div>
+</div>
+{% else %}
+	<div class="container" style="margin-top:50px;">
+		<span style="color:grey; font-size:3em;">{{ user_instance.username }} has no video posts. :(</span>
+	</div>
+{% endif %}
+
+<style type="text/css">
+	.user-profile {
+		background-color: white;
+		padding-top: 20px;
+		padding-bottom: 10px;
+	}
+
+	.profile-picture {
+		width: 160px;
+		height: 160px;
+		border-radius: 160px;
+	}
+
+	.caption {
+			padding: 10px 0px 0px 5px;
+	}
+
+	.video-card {
+		border-radius: 4px !important;
+		box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+		transition: all 0.3s cubic-bezier(.25,.8,.25,1) !important;
+		margin-bottom: 18px !important;
+		padding: 0px;
+		height: 226px;
+	}
+
+	.video-card:hover{
+		box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22) !important;
+		border: 1px solid grey !important;
+	}
+
+	.img-container {
+	}
+
+	.thumbnail img {
+		height: 160px;
+		margin: 0px !important;
+		display: block;
+		object-fit: cover;
+	}
+
+</style>
 {% endblock content %}

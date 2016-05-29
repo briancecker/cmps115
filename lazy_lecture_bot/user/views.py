@@ -5,6 +5,10 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from user.forms import *
 from django.views.decorators.csrf import csrf_protect
+from django.contrib import messages
+
+from videoapp.models import VideoPost
+from main.views import add_image_urls
 
 """""""""""""""""
 
@@ -14,6 +18,8 @@ from django.views.decorators.csrf import csrf_protect
 def show_user(request, username="None"):
 	if username is not "None":
 		user_instance = get_object_or_404(User,  username=username)
+		user_posts = VideoPost.objects.filter(public_access=True, author=user_instance).order_by('publish_date')
+		add_image_urls(user_posts)
 	else:
 		if request.user.is_active:
 			user_instance = request.user
@@ -21,8 +27,10 @@ def show_user(request, username="None"):
 			return redirect("login")
 
 	context = {
+			"vp" : user_posts,
 			"user_instance" : user_instance,
 		}
+
 	return render(request, "user/user_page.html", context)
 
 """""""""""""""""""""
@@ -57,7 +65,6 @@ def signup_view(request):
   	LOGIN USER
 
 """""""""""""""
-
 def login_user(request):
 	if not request.user.is_active:
 		if request.method == "POST":
@@ -65,7 +72,10 @@ def login_user(request):
 			if form.is_valid():
 				user = form.login(request)
 				login(request, user)
+				messages.add_message(request, messages.SUCCESS, 'Successfully Logged In! :D')
 				return redirect("/")
+			else:
+				messages.add_message(request, messages.ERROR, 'Invalid Username/Password Combination :(', 'danger')
 	else:
 		return redirect(show_user)
 	form = LoginForm()
@@ -81,7 +91,10 @@ def auth_login(request): ## This is where the actual authentication is happening
 		if form.is_valid():
 			user = form.login(request)
 			login(request, user)
-			return redirect(redirect_to)
+			messages.add_message(request, messages.SUCCESS, 'Successfully Logged In! :D')
+		else:
+			messages.add_message(request, messages.ERROR, 'Invalid Username/Password Combination :(', 'danger')
+		return redirect(redirect_to)
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

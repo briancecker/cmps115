@@ -3,38 +3,82 @@
 {% block content %}
 {{block.super}}
 
-<div class="container">
-	<ul class="nav nav-tabs nav-justified">
-		<li class="active"><a href="#">Recent Public Videos</a></li>
-		{% if request.user.is_authenticated %}
-		<li><a href="/">My Subcriptions</a></li>
-		<li><a href="/">My Favorites</a></li>
-		{% endif %}
-	</ul>
-	<div class="row" style="margin-top: 30px;">
-		{% if not vp %}
-			WHOOPS THE DATABASE IS EMPTY!
-		{% endif %}
-		
-	    {% for v in vp %}
-		<!-- VIDEO PREVIEW -->
-		<div class="col-sm-3"> 
-			<div class="thumbnail" style="border-style: none;">
-				<!-- THUMBNAIL IMAGE -->
-	      		<a href="{% url 'watch_video' v.id %}"><img src='https://placeholdit.imgix.net/~text?txtsize=23&txt=250%C3%97140&w=254&h=140' alt="..." style="height: 140px; background-color: rgb(189, 195, 199)" /></a>
-	      		<!-- OTHER INFORMATION -->
-	      		<div class="caption" style="padding: 10px 0px 0px 0px;">
-	      			<!-- VIDEO TITLE -->
-	        		<b><a href="{% url 'watch_video' v.id %}">{{ v.title }}</a></b>
-	        		<!-- VIDEO AUTHOR -->
-	        		<div><a href="{% url 'profile' v.author %}" style="color:black">{{ v.author }}</a></div>
-	        		<p>
-	        		{{ v.upload_duration }}<br>
-	        		Posted on: {{ v.publish_date }}</p>
-	      		</div>
-	      	</div>
-	    </div><!-- END OF VIDEO PREVIEW -->
-	    {% endfor %}
+<div class="container" style="padding-top: 30px;">
+	<div style="margin-top:30px;">
+		<div class="row">
+			{% if query %}
+            <div style="margin-bottom:10px;">
+                Showing search results for <span style="font-style: italic">"{{ query }}"</span>
+            </div>
+            {% endif %}
+
+		    {% for v in vp %}
+			<!-- VIDEO PREVIEW -->
+			<div class="col-sm-4 col-md-3 nopadding"> 
+				<div class="thumbnail video-card" style="border-style: none; ">
+					<!-- THUMBNAIL IMAGE -->
+		      		<a href="{% url 'watch_video' v.id %}">
+		      			<div class="img-container"><img class="img-responsive" src='{{ v.thumb_url }}'
+                         alt="" style="border-top-right-radius: 4px; border-top-left-radius: 4px;" /></div>
+		      		</a>
+		      		<!-- OTHER INFORMATION -->
+		      		<div class="caption">
+		      			<!-- VIDEO TITLE -->
+		        		<b><a href="{% url 'watch_video' v.id %}">{{ v.title }}</a></b>
+		        		<!-- VIDEO AUTHOR -->
+		        		<div><a href="{% url 'profile' v.author %}" style="color:black">{{ v.author }}</a></div>
+		      		</div>
+		      	</div>
+		    </div><!-- END OF VIDEO PREVIEW -->
+		    {% endfor %}
+		</div>
+		<div>
+	        <ul class="pagination">
+	            {% for page in pages %}
+	                {% if page == current_page %}
+	                    <li class="active"><a href="#" onClick="return false;">{{ page }}</a></li>
+	                {% else %}
+	                    <li><a href="{% url 'index' %}?{{ page_path }}&page={{ page }}">{{ page }}</a></li>
+	                {% endif %}
+	            {% endfor %}
+	        </ul>
+        </div>
 	</div>
+
+	<style type="text/css">
+		.caption {
+			padding: 10px 0px 0px 5px;
+		}
+
+		.video-card {
+			border-radius: 4px !important;
+			box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+			transition: all 0.3s cubic-bezier(.25,.8,.25,1) !important;
+			margin-bottom: 18px !important;
+			padding: 0px;
+			height: 226px;
+		}
+
+		.video-card:hover{
+			box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22) !important;
+			border: 1px solid grey !important;
+		}
+
+		.img-container {
+		}
+		.thumbnail img {
+			height: 160px;
+			margin: 0px !important;
+			display: block;
+			object-fit: cover;
+		}
+	</style>
+
+	<script type="text/javascript">
+		$( "#filter-select" ).change(function() {
+		
+		  console.log($( "#filter-select" ).val());
+		});
+	</script>
 </div>
 {% endblock content %}

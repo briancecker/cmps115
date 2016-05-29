@@ -1,9 +1,10 @@
 import logging
 
 from abc import ABCMeta
-from main.models import Segments, Transcripts, Utterances, Tokens
+from main.models import Segments, Transcripts, Utterances, Tokens, Thumbnail, BlobStorage
 from modules.blob_storage.blob_storage import store_bsr_data
 from modules.video_processing import video_processing
+from modules.video_processing.screenshotting import take_screenshot
 from modules.video_processing.video_processing import get_audio_duration
 
 logger = logging.getLogger("django")
@@ -63,6 +64,18 @@ def store_transcripts(db_video, db_segments, transcripts):
                 db_token.save()
 
         segment_offset += db_segment.segment_duration
+
+
+def make_and_store_thumbnail(video_bytes, video):
+    ss, rc = take_screenshot(video_bytes, (0, 0, 1), 250, 140)
+    if rc != 0:
+        logger.warning("non-zero error code when making screenshot for video with id: {0}. "
+                       "Abortion thumbnail creation.".format(video.id))
+    print(type(ss))
+    print(len(ss))
+    ss_blob = store_bsr_data(ss, extension="jpg")
+    thumb = Thumbnail(video=video, image_blob=ss_blob, time=1.0)
+    thumb.save()
 
 
 class VideoPipeline:
@@ -125,13 +138,14 @@ class VideoPipeline:
         Returns:
 
         """
+        video_bytes = video.video_blob.get_blob()
+        logger.info("Making thumbnail")
+        make_and_store_thumbnail(video_bytes, video)
+
         logger.info("Stripping audio and storing it")
         video.processing_status = "Stripping Audio"
         video.save()
-        video_bytes = video.video_blob.get_blob()
-        logger.info("Video bytes length: {0}".format(len(video_bytes)))
         audio = self._strip_audio(video_bytes)
-        logger.info("Audio is of length {0}".format(len(audio)))
         self._store_audio(video, audio)
 
         logger.info("Getting video and audio length")
@@ -145,9 +159,16 @@ class VideoPipeline:
         db_segments = store_segments(video, audio_segments)
 
         logger.info("transcribing {0} segments".format(len(db_segments)))
-        video.processing_status = "Transcribing Audio"
+        video.processing_status = "Transcribing Audio Chunk 1/{0}".format(len(db_segments))
         video.save()
-        transcripts = [self.audio_transcriber.transcribe(segment.audio_blob.get_blob()) for segment in db_segments]
+        transcripts = list()
+        for i, segment in enumerate(db_segments):
+            transcripts.append(self.audio_transcriber.transcribe(segment.audio_blob.get_blob()))
+            if i + 1 != len(db_segments):
+                video.processing_status = "Transcribing Audio Chunk {0}/{1}".format(i + 2, len(db_segments))
+                video.save()
+
+        # transcripts = [self.audio_transcriber.transcribe(segment.audio_blob.get_blob()) for segment in db_segments]
         store_transcripts(video, db_segments, transcripts)
 
         video.processing_status = ""
