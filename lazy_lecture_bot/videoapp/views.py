@@ -43,11 +43,28 @@ def get_transcript(video_object):
     print("getting transcripts for video_object with id: {0}".format(video_object.id))
     for segment in video_object.segments_set.all():
         for transcript in segment.transcripts_set.all():
+            utterances = transcript.utterances_set.all()
+            add_human_readable_time(utterances)
             results.append({
                 "transcript": transcript,
-                "utterances": transcript.utterances_set.all()})
+                "utterances": utterances})
     return results
 
+
+def add_human_readable_time(utterances):
+
+
+    def hours_mins_secs(secs):
+        """
+        http://stackoverflow.com/questions/775049/python-time-seconds-to-hms
+        """
+        m, s = divmod(secs, 60)
+        h, m = divmod(m, 60)
+        return "{hours}:{mins}:{secs}".format(hours=int(h), mins=int(m), secs=int(s))
+
+    for utterance in utterances:
+        utterance.h_start = hours_mins_secs(utterance.start_time)
+        utterance.h_end = hours_mins_secs(utterance.end_time)
 
 """""""""""""""""""""
 
@@ -78,9 +95,9 @@ def upload_view(request):
     }
     return render(request, "videoapp/upload.html", context)
 
-"""""
+"""
 method that helps with utterance search
-"""""
+"""
 @csrf_protect
 def search_utterances(request):
     if request.method == "POST":
