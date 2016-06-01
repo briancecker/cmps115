@@ -1,3 +1,4 @@
+{% if finished_processing %}
 <div class="utterance-search" style="height: 45px">
     <form class="utterance-form" method="POST" action="/search_utterances/" style="width: 100%">
         {% csrf_token %}
@@ -8,6 +9,7 @@
         </div>
     </form>
 </div>
+{% endif %}
 
 <div class="transcript-data" status="{{ processing_status }}" finished="{{ finished_processing }}">
 	{% if not finished_processing %}
