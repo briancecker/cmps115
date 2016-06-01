@@ -1,18 +1,21 @@
+{% if finished_processing %}
+<div class="utterance-search" style="height: 45px">
+    <form class="utterance-form" method="POST" action="/search_utterances/" style="width: 100%">
+        {% csrf_token %}
+        <input name="video-id" type="hidden" value="{{ video_id }}" />
+        <div class="form-group input-group" style="width: 100%">
+            <input name="query" type="text" class="form-control" autocomplete="off"
+                   placeholder="Type to Filter Utterances" />
+        </div>
+    </form>
+</div>
+{% endif %}
+
 <div class="transcript-data" status="{{ processing_status }}" finished="{{ finished_processing }}">
 	{% if not finished_processing %}
 		<center><div class="processing_status" >{{ processing_status }}...</div></center>
 	{% else %}
-	<div class="utterance-search">
-	    <form class="utterance-form" method="POST" action="/search_utterances/" style="width: 100%">
-	        {% csrf_token %}
-	        <input name="video-id" type="hidden" value="{{ video_id }}" />
-	        <div class="form-group input-group" style="width: 100%">
-	            <input name="query" type="text" class="form-control" autocomplete="off"
-	                   placeholder="Type to Filter Utterances" />
-	        </div>
-	    </form>
-	</div>
-	<dl class="dl-horizontal">
+	<dl class="dl-horizontal" style="overflow-y: auto; height: 655px">
 		{% for transcript in transcript_data %}
 			{% for utterance in transcript.utterances %}
 				<div class="utterance" 
@@ -20,7 +23,7 @@
 						data-utterance-id="{{utterance.id}}"
 						onclick="goToVideoTime( {{ utterance.start_time }} );" 
 						startTime="{{ utterance.start_time }}" endTime="{{ utterance.end_time }}">
-					<dt>{{ utterance.start_time }} - {{ utterance.end_time }}
+					<dt>{{ utterance.h_start }} - {{ utterance.h_end }}
 						<dd>{{ utterance.text }}</dd>
 					</dt>
 				</div>
