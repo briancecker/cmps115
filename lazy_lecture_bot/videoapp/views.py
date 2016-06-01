@@ -41,9 +41,9 @@ Helper function that retrieves a list of transcripts when passed a VideoObject.
 def get_transcript(video_object):
     results = list()
     print("getting transcripts for video_object with id: {0}".format(video_object.id))
-    for segment in video_object.segments_set.all():
+    for segment in video_object.segments_set.order_by("segment_index").all():
         for transcript in segment.transcripts_set.all():
-            utterances = transcript.utterances_set.all()
+            utterances = transcript.utterances_set.order_by("utterance_index").all()
             add_human_readable_time(utterances)
             results.append({
                 "transcript": transcript,
@@ -52,7 +52,6 @@ def get_transcript(video_object):
 
 
 def add_human_readable_time(utterances):
-
 
     def hours_mins_secs(secs):
         """
