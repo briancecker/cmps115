@@ -13,8 +13,6 @@ PROBE_SIZE = os.environ.get("PROBE_SIZE", "5000000")
 ANALYZE_DURATION = os.environ.get("ANALYZE_DURATION", "200000000")
 STRIP_AUDIO_CMD = "ffmpeg -probesize {probe_size} " \
                   "-analyzeduration {analyze_duration} " \
-                  "-vcodec h264 " \
-                  "-acodec aac " \
                   "-i - " \
                   "-y " \
                   "-ab 160k " \
