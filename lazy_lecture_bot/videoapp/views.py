@@ -59,7 +59,7 @@ def add_human_readable_time(utterances):
         """
         m, s = divmod(secs, 60)
         h, m = divmod(m, 60)
-        return "{hours}:{mins}:{secs}".format(hours=int(h), mins=int(m), secs=int(s))
+        return "{hours:02}:{mins:02}:{secs:02}".format(hours=int(h), mins=int(m), secs=int(s))
 
     for utterance in utterances:
         utterance.h_start = hours_mins_secs(utterance.start_time)
