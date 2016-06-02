@@ -8,7 +8,6 @@ from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
 
 from videoapp.models import VideoPost
-from main.views import add_image_urls
 
 """""""""""""""""
 
@@ -19,7 +18,6 @@ def show_user(request, username="None"):
 	if username is not "None":
 		user_instance = get_object_or_404(User,  username=username)
 		user_posts = VideoPost.objects.filter(public_access=True, author=user_instance).order_by('publish_date')
-		add_image_urls(user_posts)
 	else:
 		if request.user.is_active:
 			user_instance = request.user
