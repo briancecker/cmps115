@@ -1,7 +1,9 @@
 import json
 import time
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_protect
@@ -9,7 +11,7 @@ from haystack.query import SearchQuerySet
 from main.models import Segments, Transcripts, Utterances, Videos
 from modules.voice_to_text.async_tasks import queue_vp_request
 from .forms import VideoUploadForm
-from .models import VideoPost
+from .models import VideoPost, Favorite, Subscription
 
 """""""""""""""""""""
 
@@ -41,9 +43,9 @@ Helper function that retrieves a list of transcripts when passed a VideoObject.
 def get_transcript(video_object):
     results = list()
     print("getting transcripts for video_object with id: {0}".format(video_object.id))
-    for segment in video_object.segments_set.all():
+    for segment in video_object.segments_set.order_by("segment_index").all():
         for transcript in segment.transcripts_set.all():
-            utterances = transcript.utterances_set.all()
+            utterances = transcript.utterances_set.order_by("utterance_index").all()
             add_human_readable_time(utterances)
             results.append({
                 "transcript": transcript,
@@ -53,14 +55,13 @@ def get_transcript(video_object):
 
 def add_human_readable_time(utterances):
 
-
     def hours_mins_secs(secs):
         """
         http://stackoverflow.com/questions/775049/python-time-seconds-to-hms
         """
         m, s = divmod(secs, 60)
         h, m = divmod(m, 60)
-        return "{hours}:{mins}:{secs}".format(hours=int(h), mins=int(m), secs=int(s))
+        return "{hours:02}:{mins:02}:{secs:02}".format(hours=int(h), mins=int(m), secs=int(s))
 
     for utterance in utterances:
         utterance.h_start = hours_mins_secs(utterance.start_time)
@@ -140,11 +141,63 @@ def ajax_transcript_status(request):
         html = render_to_string('videoapp/utterances.html',context, request=request)
         return HttpResponse(html)
 
+
+@csrf_protect
+@login_required
+def favorite_video(request):
+    """
+    Favorite or unfavorite a video for a user
+    :param request:
+    :return:
+    """
+    if request.method == "POST":
+        vp_id = request.POST.get("video_post_id")
+        vp = VideoPost.objects.get(pk=vp_id)
+        user = User.objects.get(pk=request.user.id)
+        fav = VideoPost.objects.get(pk=vp_id).favorite_set.all().filter(user__exact=request.user)
+        if fav.exists():
+            # delete it, we're unfavoriting
+            fav.delete()
+            return HttpResponse(
+                json.dumps({"favorited": False}), content_type="application/json"
+            )
+        else:
+            Favorite(video_post=vp, user=user).save()
+            return HttpResponse(
+                json.dumps({"favorited": True}), content_type="application/json"
+            )
+
+
+@csrf_protect
+@login_required
+def subscribe(request):
+    """
+    Favorite or unfavorite a video for a user
+    :param request:
+    :return:
+    """
+    if request.method == "POST":
+        owner_id = int(request.POST.get("owner_id"))
+        if owner_id == request.user.id:
+            return HttpResponseServerError()
+        user = User.objects.get(pk=request.user.id)
+        to_user = User.objects.get(pk=owner_id)
+        subscription, created = Subscription.objects.get_or_create(user=user, subscribed_to=to_user)
+        if not created:
+            # delete it, we're unsubscribing
+            subscription.delete()
+            return HttpResponse(
+                json.dumps({"subscribed": False}), content_type="application/json"
+            )
+        else:
+            # We already created it
+            return HttpResponse(
+                json.dumps({"subscribed": True}), content_type="application/json"
+            )
+
 """
 Helper Function that returns the duration of a video using the duration of its Segments
 """
-
-
 def get_video_duration(video_object):
     segment_query = Segments.objects.filter(id=video_object.id)
     duration = 0;

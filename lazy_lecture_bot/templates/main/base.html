@@ -69,7 +69,7 @@
 			    <div class="dropdown-menu dropdown-menu-right a-dropdown-menu" aria-labelledby="dropdownMenu">
 			    	<a class="dropdown-item dropdown-link" href="{% url 'profile' user.username %}"><div class="auth-item"><i class="fa fa-user fa-fw" aria-hidden="true" style="margin-right:15px;"></i>My Profile</div></a>
 			        <a class="dropdown-item dropdown-link" href="/"><div class="auth-item"><i class="fa fa-cogs fa-fw" aria-hidden="true" style="margin-right:15px;"></i>Settings</div></a>
-			        <a class="dropdown-item dropdown-link" href="{% url 'logoff' %}?redirect={{request.path}}"><div class="auth-item"><i class="fa fa-sign-out fa-fw" aria-hidden="true" style="margin-right:15px;"></i>Logout</div></a>
+			        <a class="dropdown-item dropdown-link" href="{% url 'logoff' %}?redirect={% url 'index' %}"><div class="auth-item"><i class="fa fa-sign-out fa-fw" aria-hidden="true" style="margin-right:15px;"></i>Logout</div></a>
 			    </div>
 
 			    {% endif %}
@@ -80,12 +80,28 @@
 		<div class="container secondary-nav-container">
 			<div class="row secondary-nav">				
 				{% if request.user.is_authenticated %}
-				<a href="/" class="active"><div class="col-md-2 col-md-offset-2 text-center"><i class="fa fa-home" aria-hidden="true"></i>Home</div></a>
-				<a href="#"><div class="col-md-2 text-center"><i class="fa fa-users" aria-hidden="true"></i>Subscriptions</div></a>
-				<a href="#"><div class="col-md-2 text-center"><i class="fa fa-heart" aria-hidden="true"></i>My Favorites</div></a>
-				<a href="#"><div class="col-md-2 text-center"><i class="fa fa-envelope" aria-hidden="true"></i>Messages</div></a>
+                    {% if page == "index" %}
+                        <a href="/" class="active"><div class="col-md-2 col-md-offset-2 text-center"><i class="fa fa-home" aria-hidden="true"></i>Home</div></a>
+                    {% else %}
+                        <a href="/"><div class="col-md-2 col-md-offset-2 text-center"><i class="fa fa-home" aria-hidden="true"></i>Home</div></a>
+                    {% endif %}
+
+                    {% if page == "subscriptions" %}
+                        <a href="{% url 'subscriptions' %}" class="active"><div class="col-md-2 text-center"><i class="fa fa-users" aria-hidden="true"></i>Subscriptions</div></a>
+                    {% else %}
+                        <a href="{% url 'subscriptions' %}"><div class="col-md-2 text-center"><i class="fa fa-users" aria-hidden="true"></i>Subscriptions</div></a>
+                    {% endif %}
+
+                    {% if page == "favorites" %}
+                        <a href="/favorites/" class="active"><div class="col-md-2 text-center"><i class="fa fa-paper-plane" aria-hidden="true"></i>My Favorites</div></a>
+                    {% else %}
+                        <a href="/favorites/"><div class="col-md-2 text-center"><i class="fa fa-paper-plane" aria-hidden="true"></i>My Favorites</div></a>
+                    {% endif %}
+
+                    <a href="#"><div class="col-md-2 text-center"><i class="fa fa-envelope" aria-hidden="true"></i>Messages</div></a>
+
 				{% else %}
-				<a href="#" class="active"><div class="col-md-2 col-md-offset-5 text-center"><i class="fa fa-home" aria-hidden="true"></i>Home</div></a>
+                    <a href="#" class="active"><div class="col-md-2 col-md-offset-5 text-center"><i class="fa fa-home" aria-hidden="true"></i>Home</div></a>
 				{% endif %}
 			</div>
 		</div>
@@ -101,6 +117,12 @@
         		</div>
     		</div>
     	{% endfor %}
+    {% else %}
+     		<div class="container">
+        		<div id="js-alert" style="display: none" class="alert" role="alert" >
+        			<span id="message"></span>
+        		</div>
+    		</div>
 	{% endif %}
 
 	<style type="text/css">
@@ -172,7 +194,6 @@
 			padding-bottom: 10px;
 			padding-left: 25px;
 			padding-right: 10px;
-			background-color: ;
 		}
 
 		.dropdown-item {
@@ -245,7 +266,7 @@
 		}
 
 		/* active state */
-		.form-group input:focus ~ label , .form-group input:valid ~ label {
+		.a-dropdown-menu .form-group input:focus ~ label , .a-dropdown-menu .form-group input:valid ~ label {
 		  top: -50px;
 		  font-size:12px;
 		  color:#2EC4B6;
@@ -271,6 +292,14 @@
 			border: 0px;
 			border-radius: 4px;
 		}
+
+        .favorited {
+            font-size: 24px;
+        }
+
+        .unfavorited {
+            font-size: 14px;
+        }
 	</style>
 	{% endblock content %}
 
@@ -278,6 +307,115 @@
     <script src="{% static 'js/csrf_header.js' %}"></script>
 	<!-- Latest compiled and minified JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        function doFavorite(event) {
+            $.ajax({
+                url: "{% url 'favorite_video' %}",
+                type: "POST",
+                data : {
+                    "video_post_id": $(event).data("vp-id"),
+                },
+
+                success: function(json) {
+                    if ($(event).hasClass("fa-heart-o")) {
+                        // select
+                        $(event).removeClass("fa-heart-o");
+                        $(event).addClass("fa-heart");
+                        $(event).stop().animate({fontSize: "24px"});
+                    } else {
+                        // deselect
+                        $(event).removeClass("fa-heart");
+                        $(event).addClass("fa-heart-o");
+                        $(event).stop().animate({fontSize: "14px"});
+                    }
+                },
+
+                error: function(xhr, errmsg, err) {
+                    showAlert("Ruh roh, something went wrong!", "warning", 2500);
+                }
+            });
+        }
+
+        function doSubscribe(event) {
+            var owner_id = $(event).data("owner-id");
+            $.ajax({
+                url: "{% url 'subscribe' %}",
+                type: "POST",
+                data : {
+                    "owner_id": owner_id,
+                },
+
+                success: function(json) {
+                    // Change the subscribe icon not just for this video, but for all videos with this owner
+                    $(".caption").each(function() {
+                        $(this).find("#subscribe").each(function() {
+                            if ($(this).data("owner-id") === owner_id) {
+                                var $sub = $(this);
+                                if ($sub.hasClass("fa-paper-plane-o")) {
+                                    // select
+                                    $sub.removeClass("fa-paper-plane-o");
+                                    $sub.addClass("fa-paper-plane");
+                                    $sub.stop().animate({fontSize: "24px"});
+                                } else {
+                                    // deselect
+                                    $sub.removeClass("fa-paper-plane");
+                                    $sub.addClass("fa-paper-plane-o");
+                                    $sub.stop().animate({fontSize: "14px"});
+                                }
+                            }
+                        });
+                    });
+                },
+
+                error: function(xhr, errmsg, err) {
+                    showAlert("Ruh roh, something went wrong!", "warning", 2500);
+                }
+            });
+        }
+
+
+        var waitingInterval = null;
+        // message is a string to display
+        // type is either "success", "info", "warning", or "danger"
+        // hideAfter hides the message after that many milliseconds, use 0 to never hide the message
+        function showAlert(message, type, hideAfter) {
+            // Clear old hiding interval if it exists
+            clearInterval(waitingInterval);
+
+            if (!type in ["success", "info", "warning", "danger"]) {
+                console.log("Bad type for alert")
+                return;
+            }
+            var $alertContainer = $("#js-alert");
+            $alertContainer.find("#message").html("<strong>" + message + "</strong>");
+
+            if (waitingInterval != null) {
+                // Flash the element
+                $alertContainer.fadeOut(100).fadeIn(100);
+            }
+
+            // Setup alert color
+            if (!$alertContainer.hasClass("alert-" + type)) {
+                $alertContainer.removeClass("alert-success");
+                $alertContainer.removeClass("alert-info");
+                $alertContainer.removeClass("alert-warning");
+                $alertContainer.removeClass("alert-danger");
+                $alertContainer.addClass("alert-" + type);
+            }
+
+            $alertContainer.slideDown();
+
+            // Wait five seconds, then hide the message pane again
+            if (hideAfter > 0) {
+                waitingInterval = setInterval(function () {
+                    $alertContainer.slideUp();
+                    clearInterval(waitingInterval);
+                    waitingInterval = null;
+                }, hideAfter);
+            }
+        }
+
+    </script>
 </body>
 </html>
 

@@ -1,0 +1,80 @@
+{% for v in vp %}
+<!-- VIDEO PREVIEW -->
+<div class="col-sm-4 col-md-3 nopadding">
+    <div class="thumbnail video-card" style="border-style: none; ">
+        <!-- THUMBNAIL IMAGE -->
+        <a href="{% url 'watch_video' v.id %}">
+            <div class="img-container" style="background-color: black;"><img class="img-responsive" src='{{ v.thumb_url }}'
+             alt="" style="border-top-right-radius: 4px; border-top-left-radius: 4px;" /></div>
+        </a>
+        <!-- OTHER INFORMATION -->
+        <div class="caption">
+            {% if show_favorites and user.is_authenticated %}
+                <span style="padding-left: 5px; float: right;">
+                {% if user.id in v.favorited_by %}
+                    <i id="favorited" class="fa fa-heart favorited"
+                       data-vp-id="{{ v.id }}"
+                       onclick="doFavorite(this)"></i>
+                {% else %}
+                    <i id="favorited" class="fa fa-heart-o unfavorited"
+                       data-vp-id="{{ v.id }}"
+                       onclick="doFavorite(this)"></i>
+                {% endif %}
+                </span>
+            {% endif %}
+            {% if show_subscribe and user.is_authenticated and user.id != v.author.id %}
+                <span style="padding-left: 5px; float: right">
+                    {% if user.id in v.subscribed_to %}
+                        <i id="subscribe" class="fa fa-paper-plane favorited"
+                           data-owner-id="{{ v.author.id }}"
+                           onclick="doSubscribe(this)"></i>
+                    {% else %}
+                        <i id="subscribe" class="fa fa-paper-plane-o unfavorited"
+                           data-owner-id="{{ v.author.id }}"
+                           onclick="doSubscribe(this)"></i>
+                    {% endif %}
+                </span>
+            {% endif %}
+            <!-- VIDEO TITLE -->
+            <span class="video-title"><b><a href="{% url 'watch_video' v.id %}">{{ v.title }}</a></b></span>
+            <!-- VIDEO AUTHOR -->
+            <div><a href="{% url 'profile' v.author %}" style="color:black">{{ v.author }}</a></div>
+        </div>
+    </div>
+</div><!-- END OF VIDEO PREVIEW -->
+{% endfor %}
+
+<style type="text/css">
+    .caption {
+        padding: 10px 0px 0px 5px;
+    }
+
+    .video-card {
+        border-radius: 4px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+        transition: all 0.3s cubic-bezier(.25,.8,.25,1) !important;
+        margin-bottom: 18px !important;
+        padding: 0px;
+        height: 226px;
+    }
+
+    .video-card:hover{
+        box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22) !important;
+        border: 1px solid grey !important;
+    }
+
+    .img-container {
+    }
+    .thumbnail img {
+        height: 160px;
+        margin: 0px !important;
+        display: block;
+        object-fit: cover;
+    }
+</style>
+
+<script type="text/javascript">
+    $(".caption").each(function() {
+        $(this).find("")
+    });
+</script>

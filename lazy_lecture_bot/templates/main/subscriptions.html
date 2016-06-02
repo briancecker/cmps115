@@ -1,7 +1,7 @@
 {% extends "main/base.html" %}
 
 {% block content %}
-{% with "index" as page %}
+{% with "subscriptions" as page %}
     {{block.super}}
 {% endwith %}
 
@@ -21,19 +21,11 @@
 	                {% if page == current_page %}
 	                    <li class="active"><a href="#" onClick="return false;">{{ page }}</a></li>
 	                {% else %}
-	                    <li><a href="{% url 'index' %}?{{ page_path }}&page={{ page }}">{{ page }}</a></li>
+	                    <li><a href="{% url 'favorites' %}?{{ page_path }}&page={{ page }}">{{ page }}</a></li>
 	                {% endif %}
 	            {% endfor %}
 	        </ul>
         </div>
 	</div>
-
-
-	<script type="text/javascript">
-		$( "#filter-select" ).change(function() {
-		
-		  console.log($( "#filter-select" ).val());
-		});
-	</script>
 </div>
 {% endblock content %}

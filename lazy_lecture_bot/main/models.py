@@ -1,11 +1,16 @@
 """
 Definition of models.
 """
-
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import models
 # Create your models here.
 from django.utils import timezone
 from modules.blob_storage import blob_settings
+
+
+def get_ghost_user():
+    return get_user_model().objects.get_or_create(username='deleted')[0]
 
 
 class BlobStorage(models.Model):
@@ -93,6 +98,7 @@ class Tokens(models.Model):
     start_time = models.FloatField()
     end_time = models.FloatField()
     # Possible overkill, but it's there I guess: https://en.wikipedia.org/wiki/Longest_word_in_English
+    # Other non-english tokens could also be present, but we have to set the limit somewhere.
     text = models.CharField(max_length=35)
 
 

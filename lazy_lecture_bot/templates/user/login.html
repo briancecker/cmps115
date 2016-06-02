@@ -5,9 +5,10 @@
 {% block content %}
 {{block.super}}
 
-<div class="container">
+<div class="container" style="padding-top: 30px;">
 	<div class="row">
-		<div class="col-md-4 col-md-offset-4" style="padding: 40px 40px 40px 40px;">
+		<div class="col-md-4 col-md-offset-4 form-card">
+			<div class="text-center"><h3>Log In to LazyLectureBot</h1></div>
 			<div class="">
 				<form method="POST" action=".">{% csrf_token %}
 					<div class="form-group">
@@ -26,4 +27,12 @@
 		</div>
 	</div>
 </div>
+<style type="text/css">
+	.form-card {
+			border-radius: 4px !important;
+			box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+			background-color: white;
+			padding: 20px 40px 30px 40px;
+	}	
+</style>
 {% endblock content%}

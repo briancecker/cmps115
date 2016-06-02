@@ -5,32 +5,35 @@
 {% block content %}
 {{block.super}}
 
-<div class="container">
+<div class="container" style="padding-top: 30px;">
 	<div class="row">
-		<diV class="text-center"><h1>THIS IS SOME TEXT</h1></diV>
-	</div>
-	<div class="row">
-		<div class="col-md-4 col-md-offset-4">
-			<div class="">
+		<div class="col-md-4 col-md-offset-4 form-card">
+			<div class="text-center" style="padding-bottom:30px;"><h1>Sign Up</h1></diV>
+			<div>
 				<form method="POST" action=".">{% csrf_token %}
-					<div class="form-group">
-						<label for="{{form.email.id_for_label}}">Email</label>
+					<div class="form-group signup-formgroup">
 						{{ form.email }}
+						<span class="signup-bar"></span>
+						<label for="{{form.email.id_for_label}}">Email</label>
 						{{ form.email.errors }}
 					</div>
-					<div class="form-group">
-						<label for="{{form.username.id_for_label}}">Username</label>
+					<div class="form-group signup-formgroup">
 						{{ form.username }}
+						<span class="signup-bar"></span>
+						<label for="{{form.username.id_for_label}}">Username</label>
 						{{ form.username.errors }}
 					</div>
-					<div class="form-group">
-						<label for="{{form.password.id_for_label}}">Password</label>
+					<div class="form-group signup-formgroup">
 						{{form.password}}
+						<span class="signup-bar"></span>
+						<label for="{{form.password.id_for_label}}">Password</label>
 						{{ form.password.errors }}
+
 					</div>
-					<div class="form-group">
-						<label for="{{form.password_confirm.id_for_label}}">Confirm Password</label>
+					<div class="form-group signup-formgroup">
 						{{ form.confirm_password }}
+						<span class="signup-bar"></span>
+						<label for="{{form.password_confirm.id_for_label}}">Confirm Password</label>
 						{{ form.confirm_password.errors }}
 					</div>
 					<input type="submit" value="Sign Up" class="btn btn-primary btn-block btn-lg"></input>
@@ -39,4 +42,71 @@
 		</div>
 	</div>
 </div>
+
+<style type="text/css">
+	.form-card {
+		border-radius: 4px !important;
+		box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+		background-color: white;
+		padding: 20px 40px 40px 40px;
+	}
+
+	.signup-formgroup .form-control {
+		border-radius: 0px;
+		border-top: 0px;
+		border-left: 0px;
+		border-right: 0px;
+		border-bottom: 2px solid #F2F1EF;
+		box-shadow: none;
+		padding-left: 0px;
+		margin-top: 0px;
+	}
+
+	.signup-formgroup .form-control:focus {
+			border-bottom: 2px solid #F2F1EF !important;
+			box-shadow: none;
+	}
+
+	/*==== BOTTOM BARS ====*/
+	.signup-bar { position:relative; display:block; width:310px; }
+	.signup-bar:after     {
+	  content:'';
+	  height:2px; 
+	  width:0;
+	  bottom:1px; 
+	  position:absolute;
+	  background:#2EC4B6; 
+	  transition: all 0.3s cubic-bezier(.25,.8,.25,1) !important;
+	  -moz-transition:all 0.3s cubic-bezier(.25,.8,.25,1) !important;
+	  -webkit-transition:all 0.3s cubic-bezier(.25,.8,.25,1) !important;
+	}
+	.signup-bar:before {
+	  left:100%;
+	}
+
+	/* active state */
+	input:focus ~ .signup-bar:before, input:focus ~ .signup-bar:after {
+	  width:100%;
+	}
+
+	/*====== LABELS =======*/
+
+	.signup-formgroup label {
+		position:relative;
+		pointer-events:none;
+		font-size: 18px;
+		font-weight: lighter;
+		color: gray;
+		margin-bottom: 0px;
+		top:-27px;
+		transition: all 0.3s cubic-bezier(.25,.8,.25,1) !important;
+	}
+
+	/* active state */
+	.signup-formgroup input:focus ~ label , .signup-formgroup input:valid ~ label {
+		  top: -50px;
+		  font-size:12px;
+		  color:#2EC4B6;
+	}
+</style>
 {% endblock content%}

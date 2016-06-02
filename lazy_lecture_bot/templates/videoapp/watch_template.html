@@ -16,7 +16,18 @@
 			</div>
 
 			<div class="video-metadata">
-				<div><h1>{{ post.title }}</h1></div>
+                {% if user.is_authenticated %}
+                    {% if user.id in v.favorited_by %}
+                        <i id="favorited" style="float: right; font-size: 30pt" class="fa fa-heart"
+                           data-vp-id="{{ post.id }}" data-user-id="{{ user.id }}"
+                           onclick="doFavorite(this)"></i>
+                    {% else %}
+                        <i id="favorited" style="float: right; font-size: 30pt" class="fa fa-heart-o"
+                           data-vp-id="{{ post.id }}" data-user-id="{{ user.id }}"
+                           onclick="doFavorite(this)"></i>
+                    {% endif %}
+                {% endif %}
+                <div><h1>{{ post.title }}</h1></div>
 				<div><a href="{% url 'profile' post.author %}">{{ post.author }}</a></div>
 				<div>posted on {{ post.publish_date }}</div>
 				<div style="overflow: auto; height: 50px;">{{ post.description }}</div>
@@ -80,7 +91,7 @@
 	    $query_input.on("input", function(event) {
 	        event.preventDefault();
 	        $.ajax({
-	            url: "/search_utterances/",
+	            url: "{% url 'search_utterances' %}",
 	            type: "POST",
 	            data : {
 	                "video_id": video_id,
@@ -131,7 +142,7 @@
 		var status_checker = setInterval(function(){
 			$.ajax({
 				type: "POST",
-				url: "/transcript_status/",
+				url: "{% url 'transcript_status' %}",
 				data: {"video_id": vid, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
 				success : function(data) {
 					$(".utterance-container").html(data);
