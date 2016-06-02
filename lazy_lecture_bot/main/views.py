@@ -1,5 +1,6 @@
 import json
 
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -30,6 +31,7 @@ def index(request):
     return render(request, 'main/index.html', context)
 
 
+@login_required
 def favorites(request):
     favs = request.user.favorite_set.order_by("-video_post__publish_date").all()
     vps = [VideoPost.objects.get(pk=fav.video_post_id) for fav in favs]
