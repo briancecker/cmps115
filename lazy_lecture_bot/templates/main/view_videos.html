@@ -22,7 +22,7 @@
                 {% endif %}
                 </span>
             {% endif %}
-            {% if show_subscribe and user.is_authenticated %}
+            {% if show_subscribe and user.is_authenticated and user.id != v.author.id %}
                 <span style="padding-left: 5px; float: right">
                     {% if user.id in v.subscribed_to %}
                         <i id="subscribe" class="fa fa-paper-plane favorited"

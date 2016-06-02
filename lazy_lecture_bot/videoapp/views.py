@@ -177,7 +177,9 @@ def subscribe(request):
     :return:
     """
     if request.method == "POST":
-        owner_id = request.POST.get("owner_id")
+        owner_id = int(request.POST.get("owner_id"))
+        if owner_id == request.user.id:
+            return HttpResponseServerError()
         user = User.objects.get(pk=request.user.id)
         to_user = User.objects.get(pk=owner_id)
         subscription, created = Subscription.objects.get_or_create(user=user, subscribed_to=to_user)
