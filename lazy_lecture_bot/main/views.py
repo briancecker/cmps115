@@ -1,13 +1,14 @@
 import json
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 from haystack.query import SearchQuerySet
 from main.models import Utterances, Videos
-from videoapp.models import VideoPost
+from videoapp.models import VideoPost, Subscription
 
 
 def index(request):
@@ -38,6 +39,19 @@ def favorites(request):
 
     context = _build_index_context(request, vps)
     return render(request, "main/favorites.html", context)
+
+
+@login_required
+def subscriptions(request):
+    subs = Subscription.objects.filter(user=request.user.id).all()
+    vps = list()
+    for sub in subs:
+        vps += VideoPost.objects.filter(author_id=sub.subscribed_to_id).all()
+
+    vps.sort(key=lambda vp: vp.publish_date, reverse=True)
+
+    context = _build_index_context(request, vps)
+    return render(request, "main/subscriptions.html", context)
 
 
 def _build_index_context(request, vps, extra_context=None):

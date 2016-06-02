@@ -11,7 +11,7 @@ from haystack.query import SearchQuerySet
 from main.models import Segments, Transcripts, Utterances, Videos
 from modules.voice_to_text.async_tasks import queue_vp_request
 from .forms import VideoUploadForm
-from .models import VideoPost, Favorite
+from .models import VideoPost, Favorite, Subscription
 
 """""""""""""""""""""
 
@@ -167,11 +167,35 @@ def favorite_video(request):
                 json.dumps({"favorited": True}), content_type="application/json"
             )
 
+
+@csrf_protect
+@login_required
+def subscribe(request):
+    """
+    Favorite or unfavorite a video for a user
+    :param request:
+    :return:
+    """
+    if request.method == "POST":
+        owner_id = request.POST.get("owner_id")
+        user = User.objects.get(pk=request.user.id)
+        to_user = User.objects.get(pk=owner_id)
+        subscription, created = Subscription.objects.get_or_create(user=user, subscribed_to=to_user)
+        if not created:
+            # delete it, we're unsubscribing
+            subscription.delete()
+            return HttpResponse(
+                json.dumps({"subscribed": False}), content_type="application/json"
+            )
+        else:
+            # We already created it
+            return HttpResponse(
+                json.dumps({"subscribed": True}), content_type="application/json"
+            )
+
 """
 Helper Function that returns the duration of a video using the duration of its Segments
 """
-
-
 def get_video_duration(video_object):
     segment_query = Segments.objects.filter(id=video_object.id)
     duration = 0;

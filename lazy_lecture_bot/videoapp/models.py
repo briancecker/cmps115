@@ -44,8 +44,30 @@ class VideoPost(models.Model):
 
     favorited_by = property(_favorited_by)
 
+    def _subscribed(self):
+        """
+        Convenience set that shows which users are subscribed to the owner of this video.
+        TODO: This should actually probably be added to the User, but that seems like too much work at the moment...
+        Returns: A set of all user's (by id) that are subscribed the owner of this video.
+
+        """
+        # subscriptions = Subscription.objects.filter(Subscription.subscribed_to == self.author).all()
+        subscriptions = Subscription.objects.filter(subscribed_to=self.author.id).all()
+        if len(subscriptions) > 0:
+            return set(sub.user.id for sub in subscriptions)
+        else:
+            return set()
+
+    subscribed_to = property(_subscribed)
+
 
 class Favorite(models.Model):
     video_post = models.ForeignKey("VideoPost")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET(get_ghost_user))
 
+
+class Subscription(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET(get_ghost_user),
+                             related_name="subscribed_from")
+    subscribed_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET(get_ghost_user),
+                                      related_name="subscribed_to")

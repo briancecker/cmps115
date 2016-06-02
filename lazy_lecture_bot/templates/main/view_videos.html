@@ -10,18 +10,33 @@
         <!-- OTHER INFORMATION -->
         <div class="caption">
             {% if show_favorites and user.is_authenticated %}
+                <span style="padding-left: 5px; float: right;">
                 {% if user.id in v.favorited_by %}
-                    <i id="favorited" style="float: right" class="fa fa-heart"
-                       data-vp-id="{{ v.id }}" data-user-id="{{ user.id }}"
+                    <i id="favorited" class="fa fa-heart favorited"
+                       data-vp-id="{{ v.id }}"
                        onclick="doFavorite(this)"></i>
                 {% else %}
-                    <i id="favorited" style="float: right" class="fa fa-heart-o"
-                       data-vp-id="{{ v.id }}" data-user-id="{{ user.id }}"
+                    <i id="favorited" class="fa fa-heart-o unfavorited"
+                       data-vp-id="{{ v.id }}"
                        onclick="doFavorite(this)"></i>
                 {% endif %}
+                </span>
+            {% endif %}
+            {% if show_subscribe and user.is_authenticated %}
+                <span style="padding-left: 5px; float: right">
+                    {% if user.id in v.subscribed_to %}
+                        <i id="subscribe" class="fa fa-paper-plane favorited"
+                           data-owner-id="{{ v.author.id }}"
+                           onclick="doSubscribe(this)"></i>
+                    {% else %}
+                        <i id="subscribe" class="fa fa-paper-plane-o unfavorited"
+                           data-owner-id="{{ v.author.id }}"
+                           onclick="doSubscribe(this)"></i>
+                    {% endif %}
+                </span>
             {% endif %}
             <!-- VIDEO TITLE -->
-            <b><a href="{% url 'watch_video' v.id %}">{{ v.title }}</a></b>
+            <span class="video-title"><b><a href="{% url 'watch_video' v.id %}">{{ v.title }}</a></b></span>
             <!-- VIDEO AUTHOR -->
             <div><a href="{% url 'profile' v.author %}" style="color:black">{{ v.author }}</a></div>
         </div>
@@ -57,3 +72,9 @@
         object-fit: cover;
     }
 </style>
+
+<script type="text/javascript">
+    $(".caption").each(function() {
+        $(this).find("")
+    });
+</script>

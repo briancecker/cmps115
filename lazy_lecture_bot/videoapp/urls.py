@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^(?P<videopost_id>[0-9]+)/$', views.watch_video_view, name="watch_video"),
     url(r'^transcript_status/', views.ajax_transcript_status, name='transcript_status'),
     url(r"^favorite_video/", views.favorite_video, name="favorite_video"),
+    url(r"^subscribe/", views.subscribe, name="subscribe"),
 ]
