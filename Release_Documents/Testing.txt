@@ -1,21 +1,76 @@
+System Tests:
+    NOTE: In all scenarios, it is assumed that the LazyLectureBot app is running, and the associated ElasticSearch
+          search server is also running.
+
+    1. Addressed user stories:
+        "As a user, I would like a web interface that allows me to log in..."
+        - Click the "Log In" button
+        - A dropdown should open with a "Sign Up" button.
+        - Click "Sign Up"
+        - Type:
+            - Email: test@llb.com
+            - Username: llb
+            - Password: llblovesbluecats
+            - Confirm Password: llblovesbluecats
+            - Click "Sign Up" at the bottom of the form
+        - You should be redirected to the home page.
+        - Ensure that the button in the top right which formerly said "Log In" now says "llb"
+
+    2. DEPENDS ON (1) Addresses user stories:
+        "As a user, I would like to retrieve a text transcript of a video's content because it will allow
+        me to scan the video with ease."
+        "As a user, I would like my video to process asynchronously, so that I can close the page after the upload is
+        done and come back later."
+        "As a user, I would like more UI feedback when things like uploading are happening, so that I can tell how the
+        progress is going"
+        - Click UPLOAD and type:
+            - Title: Test
+            - Description: Short test video
+            - Privacy Settings: Public
+            - Video: Upload lazy_lecture_bot/resources/test_videos/30_sec_cpp_example.mp4
+            - When upload bar finishes, click the UPLOAD button at the bottom of the page.
+        - Click the video with name "Test"
+            - Wait until the status updates complete.
+            - Check that status updates display changing statuses including some about transcribing segments
+            - Transcript will appear where status updates previously displayed.
+
+    3. DEPENDS ON (2). Addresses user stories:
+        "As a user, I would like to search for videos that may be relevant to my current class, so that I can find
+        other perspectives from other instructors."
+        - In the main search bar where it says "What are you looking for?" type:
+            - "Short test"
+            - Click "Search"
+        - The video with name "Test" should appear
+
+    4. DEPENDS ON (2). Addresses user stories:
+        "As a user, I would like to click text search results to seek to the corresponding video location."
+        "As a user, I would like to search within a video's transcript for relevant sections because it will make
+        finding content I am looking for within a video easier."
+        - Click the video with name "Test"
+        - In the search box that says "Type to Filter Utterances", type "dialog box"
+        - There should only be one utterance displayed, and it should include the text "dialog box"
+        - Click this utterance.
+        - You should go to the location in the video that corresponds to this utterance.
+
+
 Unit Tests are listed below by team member.
 
-Brian Ecker:
-    All test files are prefaced with test_.*.py. They follow standard python unittest (the module) conventions, but
-    many test classes use the Django TestCase class instead of the standard unittest.TestCase. This is because many
-    tests involve the database or settings variables that are only available when using the Django app to run the tests.
+    Brian Ecker:
+        All test files are prefaced with test_.*.py. They follow standard python unittest (the module) conventions, but
+        many test classes use the Django TestCase class instead of the standard unittest.TestCase. This is because many
+        tests involve the database or settings variables that are only available when using the Django app to run the tests.
 
-    Use `manage.py test` to run the tests.
+        Use `manage.py test` to run the tests.
 
-    Tested modules include:
-        lazy_lecture_bot/modules/blob_storage
-        lazy_lecture_bot/modules/video_processing
-        lazy_lecture_bot/modules/voice_to_text
-        lazy_lecture_bot/modules/voice_to_text/watson
+        Tested modules include:
+            lazy_lecture_bot/modules/blob_storage
+            lazy_lecture_bot/modules/video_processing
+            lazy_lecture_bot/modules/voice_to_text
+            lazy_lecture_bot/modules/voice_to_text/watson
 
-    Equivalence classes are not used for testing because they modules primarily cover video processing, and generating
-    videos as an equivalence class is highly non-trivial. Nevertheless, they only use one or two test videos (included
-    in the repository), and this could likely be improved to have greater coverage.
+        Equivalence classes are not used for testing because they modules primarily cover video processing, and generating
+        videos as an equivalence class is highly non-trivial. Nevertheless, they only use one or two test videos (included
+        in the repository), and this could likely be improved to have greater coverage.
 
-    - Watson tests will fail if you do not have IBM credentials set up.
-    - Blob storage tests will fail if you do not have s3 credentials set up.
+        - Watson tests will fail if you do not have IBM credentials set up.
+        - Blob storage tests will fail if you do not have s3 credentials set up.
