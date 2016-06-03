@@ -1,0 +1,23 @@
+Working Prototype Known Problems Report -- LazyLectureBot -- AI/ML -- 06/03/16
+
+    Bugs and Non-functional components:
+        • mp4 or webm:
+            ◦ mp4 only works for short videos because the video is treated as an arbitrary string of bytes, and mp4 has
+              valuable meta-information at the end of the video.
+            ◦ webm should work for longer videos
+         • memory restrictions:
+            ◦ Ensure your video is not larger than 50Mb (the largest tested size), and is in webm format if it is
+              larger than 5Mb
+            ◦ If multiple videos are being uploaded at once, the worker will try to work on a lot of them at once.
+              This will cause us to blow up our memory limit (around 512Mb), and all the videos in the processing
+              pipeline will be stuck. The pipeline will recover, and it will continue to process other videos, but the
+              stuck videos will not be discarded or fixed. This could be accounted for by monitoring the total number
+              of videos being processing at once, and the size of each video because each video needs to be loaded into
+              memory completely.
+         • uptime restrictions:
+            ◦ Main site has full 24/7 uptime capability, but search functionality is limited to a max of 16 hours a
+              day uptime
+         • The Messages link at the top of the page does not do anything.
+         • Uploading private videos is buggy and untested. It may be completely non-functional.
+         • Mobile sized screens have some display issues:
+            ◦ Home, subscriptions, etc. bar overlays some of the content at the top of the page when it stacks.
