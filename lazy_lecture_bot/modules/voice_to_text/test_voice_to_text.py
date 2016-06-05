@@ -3,12 +3,8 @@ import time
 
 import os
 import random
-import shutil
-from django.test import TestCase, override_settings
-from django.utils import timezone
-from django.conf import settings
-from gunicorn.http.wsgi import create
-from main.models import Videos, Segments, Transcripts, BlobStorage, Utterances, Tokens
+from django.test import TestCase, override_settings, RequestFactory
+from main.models import Videos, Segments, Transcripts, BlobStorage, Utterances, Tokens, PipelineTypes
 from modules import file_utilities
 from modules.blob_storage import blob_settings
 from modules.blob_storage.blob_storage import store_bsr_data, create_bsr_from_s3
@@ -93,6 +89,17 @@ class TestVideoPipeline(TestCase):
                                               Bucket=blob_settings.bucket_name, ACL="public-read")
         self.test_blob = create_bsr_from_s3(self.test_s3)
 
+        pipeline_type = PipelineTypes(name="watson")
+        pipeline_type.save()
+
+        self.video = Videos(title="test", audio_blob=self.test_blob, video_blob=self.test_blob, user_id=1, finished_processing=False,
+                            processing_status="", pipeline_type=pipeline_type, video_duration=1)
+
+        self.video.save()
+
+        # Every test needs access to the request factory.
+        self.factory = RequestFactory()
+
     def tearDown(self):
         self.segmenter.cleanup()
         blob_settings.boto3_client.delete_object(Key=self.test_s3, Bucket=blob_settings.bucket_name)
@@ -105,7 +112,7 @@ class TestVideoPipeline(TestCase):
 
         vp.audio_segmenter = self.segmenter
         vp.audio_transcriber = self.transcriber
-        video = vp.process_video(self.test_blob)
+        video = vp.process_video(self.video)
         self.assertTrue(video is not None)
 
         # Might take a second for the Celery task to finish
@@ -130,7 +137,7 @@ class TestVideoPipeline(TestCase):
 
     def watson_processing(self):
         vp = WatsonVideoPipeline()
-        video = vp.process_video(self.test_blob)
+        video = vp.process_video(self.video)
         self.assertTrue(video is not None)
 
         # It might take quite some time for the Celery task to finish. This depends on internet connection.
@@ -158,7 +165,8 @@ class TestVideoPipeline(TestCase):
                        CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                        BROKER_BACKEND='memory')
     def test_async_task(self):
-        async_tasks.queue_vp_request(self.test_s3)
+        request = self.factory.post("", data={"video_file": self.test_video})
+        async_tasks.queue_vp_request(request)
 
         # Should definitely be finished by now
         self.assertEqual(Videos.objects.count(), 1)
