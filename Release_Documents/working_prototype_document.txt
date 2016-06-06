@@ -21,3 +21,5 @@ Working Prototype Known Problems Report -- LazyLectureBot -- AI/ML -- 06/03/16
          • Uploading private videos is buggy and untested. It may be completely non-functional.
          • Mobile sized screens have some display issues:
             ◦ Home, subscriptions, etc. bar overlays some of the content at the top of the page when it stacks.
+         • Favorites button on video watch page is buggy. It does not properly show favorited status, and the animation is buggy.
+           The favoriting on the index page works correctly.
